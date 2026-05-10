@@ -1,11 +1,9 @@
 import re
-import time
-from appium import webdriver
-from appium.webdriver.common.appiumby import AppiumBy
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from core import scroll_small_step
+from core import *
 import requests
+
 def extract_one_url(text: str) -> str:
     match = re.search(r'https?://\S+', text)
     return match.group(0) if match else ""

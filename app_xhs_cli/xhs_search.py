@@ -1,16 +1,9 @@
-
-import time
-import json
-
-from appium.webdriver.common.appiumby import AppiumBy
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from .xhs_common import collect_note_cards
+from .xhs_common import *
 
 
 
-
-def run(driver,args):
+def run(args):
+    driver=get_driver()
     try:
         keyword = args.keyword  # 字符串或 None
         wait = WebDriverWait(driver, 10)

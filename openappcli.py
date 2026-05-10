@@ -15,6 +15,7 @@ from sys_cli import save_page_src
 from app_xhs_cli import xhs_publish
 from app_xhs_cli import xhs_search
 from app_xhs_cli import xhs_details
+from app_xhs_cli import xhs_discover
 from core import *
 
 
@@ -67,6 +68,9 @@ def main():
     xhs_details_parser.add_argument("--note_type", required=True, choices=["video", "normal"], help="精准匹配(必填)")
     xhs_details_parser.add_argument("--dir",required=True,help="文件保存目录包括视频,图片(必填)")
 
+    xhs_discover_parser = subparsers.add_parser("xhs-discover",help="发现页面")
+    xhs_discover_parser.add_argument("--limit",  type=int,  default=10, help="返回笔记条数")
+
     args = parser.parse_args()
 
     # 检查配置文件是否存在（使用新的查找函数）
@@ -105,7 +109,7 @@ def main():
             # 回到首页再执行
             back_index(driver, "首页")
             if args.cli == "xhs-publish":
-                xhs_publish.run(driver,args)
+                xhs_publish.run(args)
             # python openappcli.py xhs-search user --keyword "辛芷蕾" --limit 5
             # python openappcli.py xhs-search note --keyword "五一假期" --order new --limit 5
             # python openappcli.py xhs-search note --keyword "我拍到了海鸥雨" --order com --limit 5
@@ -115,7 +119,7 @@ def main():
             # python openappcli.py xhs-search note --keyword "迷人又危险的特工姐姐登场" --limit 2
             # python openappcli.py xhs-search note --keyword "蜜桃女孩" --limit 5
             elif args.cli == "xhs-search":
-                xhs_search.run(driver,args)
+                xhs_search.run(args)
             # python openappcli.py xhs-details --note_id "69fbec490000000036002b77" --note_type video  --dir "c:\xhs"
             # python openappcli.py xhs-details --note_id "69699d070000000009038f36" --note_type video  --dir "c:\xhs"
             # python openappcli.py xhs-details --note_id "6985f926000000001503add5" --note_type video  --dir "c:\xhs"
@@ -125,8 +129,12 @@ def main():
             # python openappcli.py xhs-details --note_id "69c4a99d00000000230100e0" --note_type normal  --dir "c:\xhs"
             # python openappcli.py xhs-details --note_id "69cd0ac0000000002103bc97" --note_type normal --dir "c:\xhs"
             # python openappcli.py xhs-details --note_id "6989aaf100000000090384d9" --note_type normal --dir "c:\xhs"
+            # python openappcli.py xhs-details --note_id "69fec1870000000035023f32" --note_type normal --dir "c:\xhs"
             elif args.cli == "xhs-details":
-                xhs_details.run(driver,args)
+                xhs_details.run(args)
+            # python openappcli.py xhs-discover  --limit 5
+            elif args.cli == "xhs-discover":
+                xhs_discover.run(args)
         else:
             parser.print_help()
     finally:

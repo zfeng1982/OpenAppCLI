@@ -1,14 +1,7 @@
-import time
-import json
-import re
-from appium.webdriver.common.appiumby import AppiumBy
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from core import scroll_small_step,swipe_right,swipe_left,save_full_screenshot,swipe_left_at_bottom
-import os
 from PIL import Image
 import io
 import base64
+from .xhs_common import *
 
 def get_video_duration(driver):
     """
@@ -179,8 +172,8 @@ def delete_xhs_video(driver, remote_path):
     except Exception as e:
         print(f"删除失败: {e}")
 
-def run(driver,args):
-
+def run(args):
+    driver = get_driver()
     try:
         deep_link_url = f"xhsdiscover://item/{args.note_id}?type={args.note_type}"
         driver.execute_script('mobile: deepLink', { 'url': f'{deep_link_url}',})

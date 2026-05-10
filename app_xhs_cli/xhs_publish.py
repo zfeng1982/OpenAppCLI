@@ -1,10 +1,7 @@
 import sys
-from appium.webdriver.common.appiumby import AppiumBy
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-import time
 import random
 from selenium.common.exceptions import StaleElementReferenceException, NoSuchElementException
+from .xhs_common import *
 
 
 def select_images_and_next(driver, num_to_select=2,is_one_tap:str=False):
@@ -329,7 +326,8 @@ def click_long_content(driver,title:str,content:str,topics):
             add_topic_via_button(driver, topic,False)
 
 
-def run(driver,args):
+def run(args):
+    driver = get_driver()
     try:
         type = args.type
         #1.点击+
