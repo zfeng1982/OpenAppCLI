@@ -1,0 +1,30 @@
+# Appium 服务器地址（支持远程）
+appium_server:
+  url: "http://192.168.2.81:4723"    # 替换为实际 Appium server 地址
+  # 若需要带 path 也可直接写完整 url
+
+# 设备连接参数（desired capabilities）
+device:
+  platformName: "Android"
+  deviceName: "TWGDU16719003567"    # 你的设备序列号
+  noReset: true
+  unicodeKeyboard: true
+  resetKeyboard: true
+  automationName: "UiAutomator2"
+
+# 应用启动参数
+apps:
+  wx:                           # 微信
+    appPackage: com.tencent.mm
+    appActivity: com.tencent.mm.plugin.account.ui.WelcomeActivity
+    description: 微信
+
+  xhs:                          # 小红书
+    appPackage: com.xingin.xhs
+    appActivity: com.xingin.xhs.index.v2.IndexActivityV2
+    description: 小红书
+
+  douyin:                       # 抖音
+    appPackage: com.ss.android.ugc.aweme
+    appActivity: com.ss.android.ugc.aweme.splash.SplashActivity
+    description: 抖音
