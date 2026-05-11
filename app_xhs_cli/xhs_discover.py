@@ -5,7 +5,7 @@ def run(args):
     result = {}
     notes=[]
     try:
-        notes = collect_note_index_cards(driver, args.limit)
+        notes = collect_note_index_cards(driver, args.limit,15)
         result["notes"] = notes
     except Exception as e:
         print(f"({e})")

@@ -181,18 +181,23 @@ def collect_note_index_cards(driver,target_count: int,max_swipe_count=10):
                 # 这个展开不大准确
                 is_click=click_expand_by_coordinate(driver,'展开')
                 if is_click:
-                    time.sleep(1)
+                    time.sleep(2)
                     try:
-                        views = driver.find_elements(AppiumBy.XPATH, "//android.view.View")
-                        for view in views:
-                            # 优先检查 content-desc
-                            content_desc = view.get_attribute("content-desc")
-                            if content_desc and date_pattern.search(content_desc):
-                                match = list(re.finditer(r'\d', content_desc))
-                                if match:
-                                    last_digit_pos = match[-1].start()
-                                    date = content_desc[:last_digit_pos + 1].replace("编辑于","")
-                                break
+                        #评论内容太多往下拉下
+                        for i in range(15):
+                            views = driver.find_elements(AppiumBy.XPATH, "//android.view.View")
+                            for view in views:
+                                # 优先检查 content-desc
+                                content_desc = view.get_attribute("content-desc")
+                                if content_desc and date_pattern.search(content_desc):
+                                    match = list(re.finditer(r'\d', content_desc))
+                                    if match:
+                                        last_digit_pos = match[-1].start()
+                                        date = content_desc[:last_digit_pos + 1].replace("编辑于","")
+                                    break
+                            if not date and len(date)<2:
+                                scroll_small_step(driver)
+                                time.sleep(0.5)
                     except:
                         pass
                     driver.back()
