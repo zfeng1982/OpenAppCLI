@@ -57,7 +57,7 @@ def get_detail_info(driver,is_id =True):
                 comment_num = comment_btns[0].get_attribute("content-desc").replace('评论',"")
 
         except Exception as e:
-            print(f"获取评论数失败: {e}")
+            print(f"获取评论数失败")
 
             # 3. 获取收藏数（content-desc 以 '收藏' 开头的 Button）
         try:
@@ -67,7 +67,7 @@ def get_detail_info(driver,is_id =True):
                 favorites_num = collect_btns[0].get_attribute("content-desc").replace('收藏',"")
 
         except Exception as e:
-            print(f"获取收藏数失败: {e}")
+            print(f"获取收藏数失败")
 
         # like_num_fail =False
         # try:
@@ -112,104 +112,128 @@ def get_detail_info(driver,is_id =True):
                 note_id = match.group(1)
 
     except Exception as e:
-        print(f"获取笔记ID失败: {e}")
+        print(f"获取笔记ID失败")
     return  note_id,note_type,comment_num,favorites_num,like_num,httpurl
 
-def collect_note_cards(driver,target_count: int,max_swipe_count=10):
+def collect_note_index_cards(driver,target_count: int,max_swipe_count=10):
     """
     滚动并收集小红书笔记卡片信息
     :param driver: 设备
     :param limit: 需要收集的卡片数量
-    :param scroll_pause: 每次滚动后等待时间（秒）
     :param max_scrolls: 最大滚动次数，防止无限循环
     :return: 列表，每个元素为 dict {"title": str, "author": str, "date": str, "likes": str}
     """
-    wait = WebDriverWait(driver, 10)
-
-    # 等待 RecyclerView 出现
-    wait.until(EC.presence_of_element_located(
-        (AppiumBy.XPATH, "//androidx.recyclerview.widget.RecyclerView")
-    ))
-
-    # 等待至少一个卡片出现（确保内容加载）
-    wait.until(EC.presence_of_element_located(
-        (AppiumBy.XPATH, "//androidx.recyclerview.widget.RecyclerView/android.widget.FrameLayout")
-    ))
-    # 等待搜索结果页加载完成（例如等待 RecyclerView 出现）
-    recycler_xpath = "//androidx.recyclerview.widget.RecyclerView"
-    wait.until(EC.presence_of_element_located((AppiumBy.XPATH, recycler_xpath)))
-
-
     collected = []  # 存放已抓取卡片的数据
-
-
     # 获取屏幕尺寸，用于滚动
     size = driver.get_window_size()
     start_x = size["width"] // 2
     start_y = int(size["height"] * 0.8)
     end_y = int(size["height"] * 0.2)
 
-    scroll_small_step(driver)
-    time.sleep(2)  # 额外等待页面渲染
+
     title_ary=[]  #用标题来去重
     swipe_count=0
     while len(collected) < target_count:
-        # 2. 获取当前屏幕内所有可能的卡片容器（RecyclerView的直接子FrameLayout）
-        cards = driver.find_elements(AppiumBy.XPATH,
-                                     "//androidx.recyclerview.widget.RecyclerView/android.widget.FrameLayout")
+        # 定位 content-desc 以“笔记”或“视频”开头的元素
+        xpath = "//*[starts-with(@content-desc, '笔记') or starts-with(@content-desc, '视频') or starts-with(@content-desc, '直播')]"
+        elements = driver.find_elements(AppiumBy.XPATH, xpath)
+        # desc_list = [elem.get_attribute("content-desc") for elem in elements]
+        for elem in elements:
+            try:
+                desc=elem.get_attribute("content-desc")
+            except:
+                break
+            type_=""
+            title=""
+            author=""
+            likes=""
+            date=""
+            comment_num=""
+            favorites_num=""
+            note_type="normal"
+            share_link=""
+            # pattern = r'^(笔记|视频|直播)\s+(.+?)\s+来自\s*(.+?)\s*([\d.]+[万]?)?\s*(赞|人观看)$'
+            pattern = r'^(笔记|视频|直播)\s+(.+?)\s+来自\s*(.+?)\s*([\d.]+[万]?)?赞$'
+            # print(f"desc:{desc}")
 
-        for card in cards:
-            # 递归获取所有TextView和ImageView
-            text_views = card.find_elements(AppiumBy.XPATH, ".//android.widget.TextView")
-            image_views = card.find_elements(AppiumBy.XPATH, ".//android.widget.ImageView")
+            match = re.match(pattern, desc)
+            if match:
+                type_, title, author, likes = match.groups()
 
-            # text_views[0].click()
+            if not likes:
+                likes="0"
 
-            if not text_views or not image_views:
-                continue  # 缺少文本或图片，直接跳过
-
-            # 解析日期和点赞数
-            date_pattern = re.compile(r"\d{1,2}-\d{1,2}|\d{4}-\d{1,2}-\d{1,2}|\d+分钟前|\d+小时前|刚刚|昨天|\d+天前")
-            # likes_pattern = re.compile(r"^[\d,]+(\.\d+)?[万wW]?$")
-            view_len=len(text_views)
-            for idx, tv in enumerate(text_views):
-                text = tv.text.strip()
-                # print(f"text({idx}):{text}")
-                # 检查日期,如是出现了日期则日期前一个为作者,前两个为标题,后一个为点赞数
-                if date_pattern.search(text):
-                    # 防止 list index out of range
-                    if idx<2 or (idx>view_len-1):
-                        continue
-                    title=text_views[idx-2].text.strip()
-                    author = text_views[idx - 1].text.strip()
-                    # 标题已经存在则跳过.或者出现错误位的情况,如标题是数字或者日期,作者错位
-                    if title in title_ary or title.isdigit() or date_pattern.search(title) or author=="关注":
-                        # print(f"title continue:{title} author:{author}")
-                        continue
-                    tv.click()
-                    time.sleep(5)
-                    note_id,note_type,comment_num,favorites_num,_,share_link=get_detail_info(driver)
+            # print(f"type_:{type_},title:{title},author:{author},likes:{likes}")
+            # 存在就不要放子
+            if title in title_ary or title=="" or title is None or type_=='直播' or type_=="":
+                continue
+            elem.click()
+            time.sleep(4)
+            note_id, note_type, comment_num, favorites_num, _, share_link = get_detail_info(driver)
+            if not note_id or len(note_id)<5:
+                # 退出详情页面,并且跳过这个卡片
+                driver.back()
+                continue
+            date_pattern = re.compile(
+                r"\d{1,2}-\d{1,2}|\d{4}-\d{1,2}-\d{1,2}|\d+分钟前|\d+小时前|刚刚|今天|昨天|\d+天前")
+            # 获取评论数
+            if note_type =='video':
+                # 这个展开不大准确
+                is_click=click_expand_by_coordinate(driver,'展开')
+                if is_click:
+                    time.sleep(1)
+                    try:
+                        views = driver.find_elements(AppiumBy.XPATH, "//android.view.View")
+                        for view in views:
+                            # 优先检查 content-desc
+                            content_desc = view.get_attribute("content-desc")
+                            if content_desc and date_pattern.search(content_desc):
+                                match = list(re.finditer(r'\d', content_desc))
+                                if match:
+                                    last_digit_pos = match[-1].start()
+                                    date = content_desc[:last_digit_pos + 1].replace("编辑于","")
+                                break
+                    except:
+                        pass
                     driver.back()
-                    title_ary.append(title)
+            else:
+                # 最多下划20次
+                for i in range(20):
+                    scroll_small_step(driver)
+                    time.sleep(0.5)
+                    views = driver.find_elements(AppiumBy.XPATH, "//android.view.View")
+                    for view in views:
+                        # 优先检查 content-desc
+                        content_desc = view.get_attribute("content-desc")
 
-                    date = text
-                    like_num =text_views[idx+1].text.strip()
-                    note = {
-                        "title": title,
-                        "note_id": note_id,
-                        "author": author,
-                        "date": date,
-                        "like_num": like_num,
-                        "comment_num": comment_num,
-                        "favorites_num": favorites_num,
-                        "note_type": note_type,
-                        "share_link": share_link
-                    }
-
-                    collected.append(note)
-                    # 放够了直接返回吧
-                    if len(collected) >= target_count:
-                        return collected
+                        if content_desc and date_pattern.search(content_desc):
+                            # date = content_desc.replace(" 已声明原创","").replace(" 内容为自主拍摄","").replace(" 已声明原创","").rstrip(' ')
+                            match = list(re.finditer(r'\d', content_desc))
+                            if match:
+                                last_digit_pos = match[-1].start()
+                                date=content_desc[:last_digit_pos + 1].replace("编辑于","")
+                            # date = content_desc.replace(" 已声明原创","").replace(" 内容为自主拍摄","").rceplace(" 已声明原创","").rstrip(' ')
+                            break
+                    if  date and len(date)>2:
+                        break
+            time.sleep(1)
+            driver.back()
+            title_ary.append(title)
+            note = {
+                "title": title,
+                "note_id": note_id,
+                "author": author,
+                "date": date,
+                "like_num": likes,
+                "comment_num": comment_num,
+                "favorites_num": favorites_num,
+                "note_type": note_type,
+                "share_link": share_link
+            }
+            collected.append(note)
+            print(f"已获取第{len(collected)},共需要获取{target_count}篇笔记")
+            if len(collected) >= target_count:
+                return collected
 
         if  swipe_count>=max_swipe_count:
             break

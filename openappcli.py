@@ -107,7 +107,7 @@ def main():
             app_caps = apps["xhs"]
             driver = get_driver(app_caps['appPackage'], app_caps['appActivity'])
             # 回到首页再执行
-            back_index(driver, "首页")
+            back_index(driver, ['首页', '发现', '关注'])
             if args.cli == "xhs-publish":
                 xhs_publish.run(args)
             # python openappcli.py xhs-search user --keyword "辛芷蕾" --limit 5
@@ -120,15 +120,17 @@ def main():
             # python openappcli.py xhs-search note --keyword "蜜桃女孩" --limit 5
             elif args.cli == "xhs-search":
                 xhs_search.run(args)
-            # python openappcli.py xhs-details --note_id "69fbec490000000036002b77" --note_type video  --dir "c:\xhs"
-            # python openappcli.py xhs-details --note_id "69699d070000000009038f36" --note_type video  --dir "c:\xhs"
-            # python openappcli.py xhs-details --note_id "6985f926000000001503add5" --note_type video  --dir "c:\xhs"
-            # python openappcli.py xhs-details --note_id "69e88daa000000001a026c27" --note_type video  --dir "c:\xhs"
+            #
+            # 禁止下载视频
+            # python openappcli.py xhs-details --note_id "6a00593f000000000803f0bb" --note_type video  --dir "c:\xhs"
+            # 超长视频
+            # python openappcli.py xhs-details --note_id "69ff656d0000000010001c00" --note_type video  --dir "c:\xhs"
             # python openappcli.py xhs-details --note_id "6966e7af000000000b0124e0" --note_type normal  --dir "c:\xhs"
             # python openappcli.py xhs-details --note_id "69f740d50000000037035ce1" --note_type normal  --dir "c:\xhs"
             # python openappcli.py xhs-details --note_id "69c4a99d00000000230100e0" --note_type normal  --dir "c:\xhs"
             # python openappcli.py xhs-details --note_id "69cd0ac0000000002103bc97" --note_type normal --dir "c:\xhs"
             # python openappcli.py xhs-details --note_id "6989aaf100000000090384d9" --note_type normal --dir "c:\xhs"
+            # python openappcli.py xhs-details --note_id "69fec1870000000035023f32" --note_type normal --dir "c:\xhs"
             # python openappcli.py xhs-details --note_id "69fec1870000000035023f32" --note_type normal --dir "c:\xhs"
             elif args.cli == "xhs-details":
                 xhs_details.run(args)

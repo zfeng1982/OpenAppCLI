@@ -12,6 +12,7 @@ import urllib.request
 from urllib.error import URLError
 import json
 import os
+import re
 
 _driver = None
 _config = None
@@ -145,6 +146,7 @@ def get_driver(app_package: Optional[str] = None, app_activity: Optional[str] = 
         # 设置必要参数
         options.platform_name = device_config.get("platformName", "Android")
         options.device_name = device_config.get("deviceName")
+        options.set_capability('newCommandTimeout', 300)
         options.grant_permissions = True
         if not options.device_name:
             print("配置文件中 device.deviceName 不能为空")
@@ -294,7 +296,15 @@ def scroll_down_screens(driver, screens=1, swipe_duration=300):
             raise Exception("滑动多次失败，连接可能已断开")
         time.sleep(2)  # 等待内容加载
 
-def back_index(driver,xpath_text:str,max_attempts=10):
+
+def back_index(driver, xpath_texts: list, max_attempts=10):
+    """
+    通过多次返回操作回到首页，直到页面同时包含所有指定的文本元素。
+
+    :param driver: Appium driver 实例
+    :param xpath_texts: 需要同时存在的文本列表，例如 ['首页', '推荐']
+    :param max_attempts: 最大尝试次数（返回操作的次数）
+    """
     # 如果 driver 无效，尝试重连
     if not driver or not driver.session_id:
         driver.quit()
@@ -302,6 +312,7 @@ def back_index(driver,xpath_text:str,max_attempts=10):
         if not driver:
             print("无法创建 driver 会话")
             return
+
     for attempt in range(max_attempts):
         # 每次循环开始时检查会话有效性
         try:
@@ -315,21 +326,61 @@ def back_index(driver,xpath_text:str,max_attempts=10):
                 return
             continue
 
-        # 检查首页标签（使用短等待）
+        # 检查所有指定的文本是否同时存在
+        all_found = True
         try:
-            home_tabs = driver.find_elements(AppiumBy.XPATH, f"//android.widget.TextView[@text='{xpath_text}']")
-            if home_tabs:
-                return
-        except WebDriverException:
-            # 如果查找元素又引发 socket hang up，将会话标记为失效，下次循环会重连
-            print("查找首页标签时连接异常，将在下一次循环重试")
+            for text in xpath_texts:
+                elements = driver.find_elements(
+                    AppiumBy.XPATH, f"//android.widget.TextView[@text='{text}']"
+                )
+                if not elements:
+                    all_found = False
+                    break
+        except WebDriverException as e:
+            # 查找元素时发生连接异常，认为会话可能失效，下次循环会重连
+            print(f"查找首页标签时连接异常: {e}，将在下一次循环重试")
             continue
 
-        # 执行返回操作
+        # 如果所有文本都存在，则认为已回到首页，直接返回
+        if all_found:
+            return
+
+        # 否则执行返回操作，并等待页面刷新
         try:
             driver.back()
-            # 等待页面刷新，避免连续 back 太快
             time.sleep(0.5)
         except WebDriverException as e:
             print(f"返回操作失败: {e}")
+
     print(f"⚠️ 尝试 {max_attempts} 次后仍未回到首页，请手动检查")
+
+def click_expand_by_coordinate(driver,text, offset_ratio=0.2):
+    """
+    通过 XPath 找到可点击的“展开” TextView，
+    获取其 bounds，计算点击坐标（右下角向左偏移），然后模拟点击。
+    """
+    try:
+        # 定位包含“展开”且可点击的 TextView
+        expand_elem = driver.find_element(AppiumBy.XPATH, f"//android.widget.TextView[contains(@text, '{text}') and @clickable='true']")
+        bounds = expand_elem.get_attribute("bounds")
+        if not bounds:
+            return False
+
+        # 解析 bounds 字符串，格式为 "[x1,y1][x2,y2]"
+        coords = list(map(int, re.findall(r"\d+", bounds)))
+        if len(coords) != 4:
+            return False
+        x1, y1, x2, y2 = coords
+
+        # 计算点击坐标：x 取右侧向左偏移 offset_ratio 宽度，y 取中间
+        width = x2 - x1
+        click_x = x2 - int(width * offset_ratio)
+        click_y = (y1 + y2) // 2
+
+        # 模拟点击
+        driver.tap([(click_x, click_y)], duration=50)
+        # print(f"点击展开成功，坐标({click_x}, {click_y})")
+        return True
+    except Exception as e:
+        # print(f"'{text}'不存,不能点击")
+        return False
