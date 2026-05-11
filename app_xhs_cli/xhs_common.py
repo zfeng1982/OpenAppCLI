@@ -89,7 +89,9 @@ def get_detail_info(driver,is_id =True):
         # 先用分享文本找,找不到用moreOperateIV
         try:
             share_btn = driver.find_element(AppiumBy.XPATH, ".//*[@content-desc='分享']")
+            print("分享分享分享")
         except:
+            print("moreOperateIV")
             share_btn = driver.find_element(AppiumBy.ID, "com.xingin.xhs:id/moreOperateIV")
 
         if share_btn:
@@ -154,7 +156,7 @@ def collect_note_index_cards(driver,target_count: int,max_swipe_count=10):
             share_link=""
             # pattern = r'^(笔记|视频|直播)\s+(.+?)\s+来自\s*(.+?)\s*([\d.]+[万]?)?\s*(赞|人观看)$'
             pattern = r'^(笔记|视频|直播)\s+(.+?)\s+来自\s*(.+?)\s*([\d.]+[万]?)?赞$'
-            # print(f"desc:{desc}")
+            print(f"desc:{desc}")
 
             match = re.match(pattern, desc)
             if match:
@@ -163,7 +165,7 @@ def collect_note_index_cards(driver,target_count: int,max_swipe_count=10):
             if not likes:
                 likes="0"
 
-            # print(f"type_:{type_},title:{title},author:{author},likes:{likes}")
+            print(f"type_:{type_},title:{title},author:{author},likes:{likes}")
             # 存在就不要放子
             if title in title_ary or title=="" or title is None or type_=='直播' or type_=="":
                 continue
@@ -178,34 +180,41 @@ def collect_note_index_cards(driver,target_count: int,max_swipe_count=10):
                 r"\d{1,2}-\d{1,2}|\d{4}-\d{1,2}-\d{1,2}|\d+分钟前|\d+小时前|刚刚|今天|昨天|\d+天前")
             # 获取评论数
             if note_type =='video':
+                pass
                 # 这个展开不大准确
+                # time.sleep(1)
                 is_click=click_expand_by_coordinate(driver,'展开')
                 if is_click:
-                    time.sleep(2)
-                    try:
-                        #评论内容太多往下拉下
-                        for i in range(15):
-                            views = driver.find_elements(AppiumBy.XPATH, "//android.view.View")
-                            for view in views:
-                                # 优先检查 content-desc
-                                content_desc = view.get_attribute("content-desc")
-                                if content_desc and date_pattern.search(content_desc):
-                                    match = list(re.finditer(r'\d', content_desc))
-                                    if match:
-                                        last_digit_pos = match[-1].start()
-                                        date = content_desc[:last_digit_pos + 1].replace("编辑于","")
+                    time.sleep(1)
+                    #展示开必须能找到评论两个字,否则可能是点错位置了
+                    elements = driver.find_elements(AppiumBy.XPATH,"//android.widget.TextView[contains(@text, '评论')]")
+                    if len(elements) > 0:
+                        try:
+                            #评论内容太多往下拉下
+                            for i in range(20):
+                                views = driver.find_elements(AppiumBy.XPATH, "//android.view.View")
+                                for view in views:
+                                    # 优先检查 content-desc
+                                    content_desc = view.get_attribute("content-desc")
+                                    if content_desc and date_pattern.search(content_desc):
+                                        match = list(re.finditer(r'\d', content_desc))
+                                        if match:
+                                            last_digit_pos = match[-1].start()
+                                            date = content_desc[:last_digit_pos + 1].replace("编辑于","")
+                                        break
+                                if not date and len(date)<2:
+                                    scroll_small_step(driver)
+                                    time.sleep(0.1)
+                                else:
                                     break
-                            if not date and len(date)<2:
-                                scroll_small_step(driver)
-                                time.sleep(0.5)
-                    except:
-                        pass
+                        except:
+                            pass
                     driver.back()
             else:
                 # 最多下划20次
                 for i in range(20):
                     scroll_small_step(driver)
-                    time.sleep(0.5)
+                    time.sleep(0.1)
                     views = driver.find_elements(AppiumBy.XPATH, "//android.view.View")
                     for view in views:
                         # 优先检查 content-desc
@@ -218,7 +227,7 @@ def collect_note_index_cards(driver,target_count: int,max_swipe_count=10):
                                 last_digit_pos = match[-1].start()
                                 date=content_desc[:last_digit_pos + 1].replace("编辑于","")
                             # date = content_desc.replace(" 已声明原创","").replace(" 内容为自主拍摄","").rceplace(" 已声明原创","").rstrip(' ')
-                            break
+                                break
                     if  date and len(date)>2:
                         break
             time.sleep(1)
@@ -244,7 +253,7 @@ def collect_note_index_cards(driver,target_count: int,max_swipe_count=10):
             break
         # 4. 滚动加载更多
         driver.swipe(start_x, start_y, start_x, end_y, duration=800)
-        time.sleep(2)
+        time.sleep(3)
         swipe_count=swipe_count+1
     return collected
 
