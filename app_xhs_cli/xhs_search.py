@@ -72,8 +72,7 @@ def collect_note_search_cards(driver,target_count: int,max_swipe_count=10):
                         # print(f"title continue:{title} author:{author}")
                         continue
                     tv.click()
-                    time.sleep(5)
-
+                    time.sleep(4)
                     detailNote = get_detail_info(driver)
                     note_id = detailNote.get("note_id")
                     note_type = detailNote.get("note_type")
