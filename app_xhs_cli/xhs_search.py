@@ -73,7 +73,15 @@ def collect_note_search_cards(driver,target_count: int,max_swipe_count=10):
                         continue
                     tv.click()
                     time.sleep(5)
-                    note_id,note_type,comment_num,favorites_num,_,share_link=get_detail_info(driver)
+
+                    detailNote = get_detail_info(driver)
+                    note_id = detailNote.get("note_id")
+                    note_type = detailNote.get("note_type")
+                    comment_num = detailNote.get("comment_num")
+                    favorites_num = detailNote.get("favorites_num")
+                    share_link = detailNote.get("share_link")
+
+
                     driver.back()
                     title_ary.append(title)
 

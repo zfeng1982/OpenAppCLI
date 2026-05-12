@@ -16,6 +16,7 @@ from app_xhs_cli import xhs_publish
 from app_xhs_cli import xhs_search
 from app_xhs_cli import xhs_details
 from app_xhs_cli import xhs_discover
+from app_xhs_cli import xhs_followed
 from core import *
 
 
@@ -68,8 +69,9 @@ def main():
     xhs_details_parser.add_argument("--note_type", required=True, choices=["video", "normal"], help="精准匹配(必填)")
     xhs_details_parser.add_argument("--dir",required=True,help="文件保存目录包括视频,图片(必填)")
 
-    xhs_discover_parser = subparsers.add_parser("xhs-discover",help="发现页面")
-    xhs_discover_parser.add_argument("--limit",  type=int,  default=10, help="返回笔记条数")
+    xhs_index_parser = subparsers.add_parser("xhs-index",help="首页")
+    xhs_index_parser.add_argument("type",  choices=["discover", "followed"], help="关注,发现")
+    xhs_index_parser.add_argument("--limit",  type=int,  default=10, help="返回笔记条数")
 
     args = parser.parse_args()
 
@@ -134,9 +136,13 @@ def main():
             # python openappcli.py xhs-details --note_id "69fec1870000000035023f32" --note_type normal --dir "c:\xhs"
             elif args.cli == "xhs-details":
                 xhs_details.run(args)
-            # python openappcli.py xhs-discover  --limit 5
-            elif args.cli == "xhs-discover":
-                xhs_discover.run(args)
+            # python openappcli.py xhs-index discover  --limit 5
+            elif args.cli == "xhs-index":
+                if args.type=="discover":
+                    xhs_discover.run(args)
+                elif args.type=="followed":
+                    xhs_followed.run(args)
+
         else:
             parser.print_help()
     finally:
