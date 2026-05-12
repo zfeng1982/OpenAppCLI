@@ -72,7 +72,10 @@ def collect_note_search_cards(driver,target_count: int,max_swipe_count=10):
                         # print(f"title continue:{title} author:{author}")
                         continue
                     tv.click()
-                    time.sleep(4)
+                    if not detail_click_suc(driver):
+                        print(f"详情页不可获取,collect_note_cards:{title}")
+                        # 整张卡片都不要
+                        break
                     detailNote = get_detail_info(driver)
                     note_id = detailNote.get("note_id")
                     note_type = detailNote.get("note_type")

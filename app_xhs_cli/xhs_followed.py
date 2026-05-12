@@ -15,17 +15,7 @@ def collect_note_cards(driver,target_count: int,max_swipe_count=10):
     # 等待搜索结果页加载完成（例如等待 RecyclerView 出现）
     recycler_xpath = "//androidx.recyclerview.widget.RecyclerView"
     wait.until(EC.presence_of_element_located((AppiumBy.XPATH, recycler_xpath)))
-
-
     collected = []  # 存放已抓取卡片的数据
-
-
-    # 获取屏幕尺寸，用于滚动
-    # size = driver.get_window_size()
-    # start_x = size["width"] // 2
-    # start_y = int(size["height"] * 0.8)
-    # end_y = int(size["height"] * 0.2)
-
     scroll_small_step(driver)
     time.sleep(2)  # 额外等待页面渲染
     deduplicate_char=[]  #标题要进入详情页取,使用作者+时间+点赞数来去重,除非同一个作者同一天发两条,而点赞数一让,这种去掉一条也没关系.
@@ -41,15 +31,13 @@ def collect_note_cards(driver,target_count: int,max_swipe_count=10):
             except Exception as e:
                 print(f"text_views/image_views失败:{e}")
                 break
-            if not text_views or not image_views:
+            if not text_views  or  not image_views or len(text_views)<3 or len(image_views)<2:
                 continue  # 缺少文本或图片，直接跳过
 
             # 解析日期和点赞数
             date_pattern = re.compile(r"\d{1,2}-\d{1,2}|\d{4}-\d{1,2}-\d{1,2}|\d+分钟前|\d+小时前|刚刚|今天|昨天|\d+天前")
 
-            # for idx in range(len(text_views)):
             for idx, tv in enumerate(text_views):
-                time.sleep(0.5)
                 try:
                     text = tv.text.strip()
                 except Exception as e:
@@ -57,7 +45,7 @@ def collect_note_cards(driver,target_count: int,max_swipe_count=10):
                     break
                 # print(f"text({idx}):{text}")
                 # 检查日期,如是出现了日期则日期前一个为作者,前两个为标题,后一个为点赞数
-                if date_pattern.search(text) and  image_views[0] and image_views[0].is_enabled():
+                if date_pattern.search(text):
                     if idx!=1:
                         continue
                     date = text
@@ -70,10 +58,12 @@ def collect_note_cards(driver,target_count: int,max_swipe_count=10):
                     if ded in deduplicate_char:
                         continue
                     deduplicate_char.append(ded)
-                    # 进入详情页
                     image_views[0].click()
-                    time.sleep(4)
-
+                    # time.sleep(2)
+                    # 用这个条件来判断是否进入详情页面
+                    if not detail_click_suc(driver):
+                        print(f"详情页不可获取 ded:{ded}")
+                        break
                     # 得到详情页
                     detailNote = get_detail_info(driver)
                     time.sleep(1)
@@ -116,12 +106,12 @@ def collect_note_cards(driver,target_count: int,max_swipe_count=10):
             print("迷路了重新开始吧")
         else:
             # 滚动加载更多
-            print("滚动加载更多")
-            scroll_small_step(driver, 0.3)
-        time.sleep(2)
+            scroll_small_step(driver, 0.2)
+        time.sleep(1)
         swipe_count=swipe_count+1
     return collected
 def run(args):
+    start_time = time.time()
     driver = get_driver()
     result = {}
     notes=[]
@@ -129,9 +119,12 @@ def run(args):
         follow_tab = driver.find_element(AppiumBy.XPATH, "//androidx.appcompat.app.ActionBar.Tab[@content-desc='关注']")
         follow_tab.click()
         time.sleep(3)
-        notes = collect_note_cards(driver, args.limit,30)
+        notes = collect_note_cards(driver, args.limit,50)
         result["notes"] = notes
     except Exception as e:
         print(f"({e})")
     print(json.dumps(result, ensure_ascii=False, indent=2))
-    print(f"notes len:{len(notes)}")
+    elapsed = time.time() - start_time
+    hours, rem = divmod(elapsed, 3600)
+    minutes, seconds = divmod(rem, 60)
+    print(f"读取[首页>关注]笔记{len(notes)}篇 总耗时: {int(hours):02d}:{int(minutes):02d}:{seconds:05.2f}")

@@ -379,10 +379,10 @@ def click_expand_by_coordinate(driver,text, offset_ratio=0.2):
 
         # 模拟点击
         driver.tap([(click_x, click_y)], duration=50)
-        print(f"点击展开成功，坐标({click_x}, {click_y})")
+        # print(f"点击展开成功，坐标({click_x}, {click_y})")
         return True
     except Exception as e:
-        print(f"'{text}'不存,不能点击")
+        # print(f"'{text}'不存,不能点击")
         return False
 
 def check_current_page(driver, xpath_texts: list):
