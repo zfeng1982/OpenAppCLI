@@ -55,6 +55,7 @@ def get_detail_info(driver,is_id =True):
     # 默认为普通图文类型
     note_type="normal"
     httpurl=""
+    title=""
 
     try:
 
@@ -123,6 +124,8 @@ def get_detail_info(driver,is_id =True):
             time.sleep(1)
             # 3.获取剪贴板内容
             share_link = driver.get_clipboard_text()
+            title = share_link[:share_link.find("http")].strip()
+            # print(f"share_link:{share_link}")
             httpurl = extract_one_url(share_link)
             if is_id:
                 lonurl = expand_short_url(httpurl)
@@ -136,7 +139,7 @@ def get_detail_info(driver,is_id =True):
         print(f"获取笔记ID失败")
 
     return {
-            "title": "",
+            "title": title,
             "note_id": note_id,
             "author": "",
             "date": "",
