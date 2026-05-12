@@ -384,3 +384,23 @@ def click_expand_by_coordinate(driver,text, offset_ratio=0.2):
     except Exception as e:
         print(f"'{text}'不存,不能点击")
         return False
+
+def check_current_page(driver, xpath_texts: list):
+    try:
+        # 如果 driver 无效，尝试重连
+        if not driver or not driver.session_id:
+            driver.quit()
+            driver = get_driver()
+            if not driver:
+                print("无法创建 driver 会话")
+                return False
+        for text in xpath_texts:
+            elements = driver.find_elements( AppiumBy.XPATH, f"//android.widget.TextView[@text='{text}']")
+            if not elements:
+                return False
+        return True
+    except WebDriverException as e:
+        print()
+    return  False
+
+

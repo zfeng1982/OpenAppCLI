@@ -38,13 +38,16 @@ def is_video_note(driver) -> bool:
         return False
 #一般用于获取广告的喜欢数,收藏数和评论数,对应的index分别是0,1,2
 def get_last_three_numbers_appium(driver):
-    elements = driver.find_elements(AppiumBy.XPATH, "//android.widget.TextView")
-    if len(elements) < 3:
-        return None
-    last_three = elements[-3:]
-    texts = [el.text for el in last_three]
-    if all(re.match(r'^\d+$', t) for t in texts):
-        return texts
+    try:
+        elements = driver.find_elements(AppiumBy.XPATH, "//android.widget.TextView")
+        if len(elements) < 3:
+            return None
+        last_three = elements[-3:]
+        texts = [el.text for el in last_three]
+        if all(re.match(r'^\d+$', t) for t in texts):
+            return texts
+    except Exception as e:
+        print(f"获取互动数据失败:{e})")
     return None
 
 def get_detail_info(driver,is_id =True):
@@ -91,7 +94,6 @@ def get_detail_info(driver,is_id =True):
                 comment_num=interaction_metrics[2]
 
 
-
         # like_num_fail =False
         # try:
         #     like_layout = driver.find_element(AppiumBy.XPATH,
@@ -136,7 +138,7 @@ def get_detail_info(driver,is_id =True):
                     note_id = match.group(1)
 
     except Exception as e:
-        print(f"获取笔记ID失败")
+        print(f"获取笔记详情失败:{e}")
 
     return {
             "title": title,
@@ -190,7 +192,7 @@ def collect_note_index_cards(driver,target_count: int,max_swipe_count=10):
             share_link=""
             # pattern = r'^(笔记|视频|直播)\s+(.+?)\s+来自\s*(.+?)\s*([\d.]+[万]?)?\s*(赞|人观看)$'
             pattern = r'^(笔记|视频|直播)\s+(.+?)\s+来自\s*(.+?)\s*([\d.]+[万]?)?赞$'
-            print(f"desc:{desc}")
+            # print(f"desc:{desc}")
 
             match = re.match(pattern, desc)
             if match:
@@ -199,7 +201,7 @@ def collect_note_index_cards(driver,target_count: int,max_swipe_count=10):
             if not likes:
                 likes="0"
 
-            print(f"type_:{type_},title:{title},author:{author},likes:{likes}")
+            # print(f"type_:{type_},title:{title},author:{author},likes:{likes}")
             # 存在就不要放子
             if title in title_ary or title=="" or title is None or type_=='直播' or type_=="":
                 continue
