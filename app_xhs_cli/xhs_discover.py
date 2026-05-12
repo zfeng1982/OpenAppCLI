@@ -1,5 +1,5 @@
 from .xhs_common import *
-# python openappcli.py xhs-discover  --limit 2
+# python openappcli.py xhs-index discover  --limit 5
 def run(args):
     driver = get_driver()
     result = {}
