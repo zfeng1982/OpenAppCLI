@@ -8,6 +8,8 @@ from appium import webdriver as appium_webdriver
 from appium.options.common.base import AppiumOptions
 from selenium.common.exceptions import WebDriverException
 from appium.webdriver.common.appiumby import AppiumBy
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import urllib.request
 from urllib.error import URLError
 import json
@@ -361,7 +363,7 @@ def click_expand_by_coordinate(driver,text, offset_ratio=0.2):
     """
     try:
         # 定位包含“展开”且可点击的 TextView
-        expand_elem = driver.find_element(AppiumBy.XPATH, f"//android.widget.TextView[contains(@text, '{text}') and @clickable='true']")
+        expand_elem=WebDriverWait(driver, 5).until(EC.presence_of_element_located((AppiumBy.XPATH, f"//android.widget.TextView[contains(@text, '{text}') and @clickable='true']")))
         bounds = expand_elem.get_attribute("bounds")
         if not bounds:
             return False
