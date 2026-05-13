@@ -1,3 +1,5 @@
+import sys
+
 from .xhs_common import *
 
 def collect_note_search_cards(driver,target_count: int,max_swipe_count=10):
@@ -71,8 +73,10 @@ def collect_note_search_cards(driver,target_count: int,max_swipe_count=10):
                     if not dsc:
                         print(f"详情页不可获取,collect_note_cards:{title}")
                         #还是点一下返回?
-                        tv.click()
-                        break
+                        # tv.click()
+                        # break
+                        sys.exit(1)
+
                     detailNote = get_detail_info(driver,share_btn)
                     note_id = detailNote.get("note_id")
                     note_type = detailNote.get("note_type")
