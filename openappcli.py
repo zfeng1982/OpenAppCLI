@@ -109,7 +109,7 @@ def main():
             app_caps = apps["xhs"]
             driver = get_driver(app_caps['appPackage'], app_caps['appActivity'])
             # 回到首页再执行
-            back_index(driver, ['首页', '发现', '关注'])
+            back_index(driver, ['首页', '发现', '我'])
             if args.cli == "xhs-publish":
                 xhs_publish.run(args)
             # python openappcli.py xhs-search user --keyword "辛芷蕾" --limit 5
