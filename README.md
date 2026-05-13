@@ -3,7 +3,7 @@
 - Operate a mobile app using a computer's command-line interface (CLI)  
 - The project aims to enable AI agents to operate mobile apps.
 ## Implementation Checklist
-### System CLI
+### Mobile System CLI
 - launch-app: Launch a specified application.
 - sps: Save the UI hierarchy/source code of the current app page.
 - push-file: Push files (images, text, etc.) to the mobile device.
