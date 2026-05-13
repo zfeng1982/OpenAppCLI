@@ -33,8 +33,13 @@ def collect_note_search_cards(driver,target_count: int,max_swipe_count=10):
 
         for card in cards:
             # 递归获取所有TextView和ImageView
-            text_views = card.find_elements(AppiumBy.XPATH, ".//android.widget.TextView")
-            image_views = card.find_elements(AppiumBy.XPATH, ".//android.widget.ImageView")
+            try:
+                text_views = card.find_elements(AppiumBy.XPATH, ".//android.widget.TextView")
+                image_views = card.find_elements(AppiumBy.XPATH, ".//android.widget.ImageView")
+            except Exception as e:
+                print(f"text_views/image_views: {e}")
+                break
+
 
             # text_views[0].click()
 
@@ -65,7 +70,8 @@ def collect_note_search_cards(driver,target_count: int,max_swipe_count=10):
                     dsc, share_btn = detail_click_suc(driver)
                     if not dsc:
                         print(f"详情页不可获取,collect_note_cards:{title}")
-                        # 整张卡片都不要
+                        #还是点一下返回?
+                        tv.click()
                         break
                     detailNote = get_detail_info(driver,share_btn)
                     note_id = detailNote.get("note_id")
@@ -96,7 +102,7 @@ def collect_note_search_cards(driver,target_count: int,max_swipe_count=10):
         if  swipe_count>=max_swipe_count:
             break
         # 4. 滚动加载更多
-        scroll_small_step(driver, 0.2)
+        scroll_small_step(driver,0.15)
         swipe_count=swipe_count+1
     return collected
 
@@ -195,7 +201,7 @@ def run(args):
                     latest_btns[0].click()
                     time.sleep(1)#点击后等待
 
-            notes=collect_note_search_cards(driver,args.limit,30)
+            notes=collect_note_search_cards(driver,args.limit,70)
             result["notes"] = notes
         print(json.dumps(result, ensure_ascii=False, indent=2))
         elapsed = time.time() - start_time
