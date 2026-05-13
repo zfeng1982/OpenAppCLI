@@ -61,11 +61,12 @@ def collect_note_cards(driver,target_count: int,max_swipe_count=10):
                     image_views[0].click()
                     # time.sleep(2)
                     # 用这个条件来判断是否进入详情页面
-                    if not detail_click_suc(driver):
+                    dsc, share_btn = detail_click_suc(driver)
+                    if not dsc:
                         print(f"详情页不可获取 ded:{ded}")
                         break
                     # 得到详情页
-                    detailNote = get_detail_info(driver)
+                    detailNote = get_detail_info(driver,share_btn)
                     time.sleep(1)
                     driver.back()
                     time.sleep(1)
@@ -91,7 +92,7 @@ def collect_note_cards(driver,target_count: int,max_swipe_count=10):
                         continue
 
                     collected.append(note)
-                    print(f"已获取第{len(collected)},共需要获取{target_count}篇笔记")
+                    print(f"已获取{len(collected)}篇,共需要获取{target_count}篇笔记")
                     # 放够了直接返回吧
                     if len(collected) >= target_count:
                         return collected

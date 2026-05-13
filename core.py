@@ -356,35 +356,34 @@ def back_index(driver, xpath_texts: list, max_attempts=10):
 
     print(f"⚠️ 尝试 {max_attempts} 次后仍未回到首页，请手动检查")
 
-def click_expand_by_coordinate(driver,text, offset_ratio=0.2):
+def click_expand_by_coordinate(driver, text, offset_pixels=10):
     """
-    通过 XPath 找到可点击的“展开” TextView，
-    获取其 bounds，计算点击坐标（右下角向左偏移），然后模拟点击。
+    通过 XPath 找到包含指定文本（如“展开”）的 TextView，
+    点击其右下角区域（靠右偏移 offset_pixels 像素），以精确点到“展开”文字。
     """
     try:
-        # 定位包含“展开”且可点击的 TextView
-        expand_elem=WebDriverWait(driver, 5).until(EC.presence_of_element_located((AppiumBy.XPATH, f"//android.widget.TextView[contains(@text, '{text}') and @clickable='true']")))
+        expand_elem = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((AppiumBy.XPATH, f"//android.widget.TextView[contains(@text, '{text}') and @clickable='true']"))
+        )
         bounds = expand_elem.get_attribute("bounds")
         if not bounds:
             return False
 
-        # 解析 bounds 字符串，格式为 "[x1,y1][x2,y2]"
+        # 解析 bounds 字符串 "[x1,y1][x2,y2]"
         coords = list(map(int, re.findall(r"\d+", bounds)))
         if len(coords) != 4:
             return False
         x1, y1, x2, y2 = coords
 
-        # 计算点击坐标：x 取右侧向左偏移 offset_ratio 宽度，y 取中间
-        width = x2 - x1
-        click_x = x2 - int(width * offset_ratio)
-        click_y = (y1 + y2) // 2
+        # 点击右下角，然后向左偏移 offset_pixels 像素（避免点到屏幕外）
+        click_x = x2 - offset_pixels
+        click_y = (y1 + y2) // 2   # 垂直中心
 
-        # 模拟点击
         driver.tap([(click_x, click_y)], duration=50)
         # print(f"点击展开成功，坐标({click_x}, {click_y})")
         return True
     except Exception as e:
-        # print(f"'{text}'不存,不能点击")
+        # print(f"点击展开失败: {e}")
         return False
 
 def check_current_page(driver, xpath_texts: list):
@@ -402,7 +401,7 @@ def check_current_page(driver, xpath_texts: list):
                 return False
         return True
     except WebDriverException as e:
-        print()
+        print(f"check_current_page错误:{e}")
     return  False
 
 

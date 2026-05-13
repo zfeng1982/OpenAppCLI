@@ -18,7 +18,8 @@ def collect_note_cards(driver,target_count: int,max_swipe_count=10):
     while len(collected) < target_count:
         # 定位 content-desc 以“笔记”或“视频”开头的元素
         xpath = "//*[starts-with(@content-desc, '笔记') or starts-with(@content-desc, '视频')]"
-        elements = driver.find_elements(AppiumBy.XPATH, xpath)
+        # elements = driver.find_elements(AppiumBy.XPATH, xpath)
+        elements=WebDriverWait(driver, 5).until(EC.presence_of_all_elements_located((AppiumBy.XPATH, xpath)))
         # desc_list = [elem.get_attribute("content-desc") for elem in elements]
         for elem in elements:
             try:
@@ -45,76 +46,21 @@ def collect_note_cards(driver,target_count: int,max_swipe_count=10):
             if title in title_ary or title=="" or title is None or type_=='直播' or type_=="":
                 continue
             elem.click()
-            if not detail_click_suc(driver):
+            dsc,share_btn=detail_click_suc(driver)
+            if not dsc:
                 print(f"详情页不可获取,collect_note_cards:{title}")
                 continue
-            detailNote=get_detail_info(driver)
+            detailNote=get_detail_info(driver,share_btn,True)
             note_id=detailNote.get("note_id")
             note_type=detailNote.get("note_type")
             comment_num=detailNote.get("comment_num")
             favorites_num=detailNote.get("favorites_num")
             share_link=detailNote.get("share_link")
-
-
-            if not note_id or len(note_id)<5:
-                # 退出详情页面,并且跳过这个卡片
-                driver.back()
-                continue
-            date_pattern = re.compile(r"\d{1,2}-\d{1,2}|\d{4}-\d{1,2}-\d{1,2}|\d+分钟前|\d+小时前|刚刚|今天|昨天|\d+天前")
-            # 获取评论数
-            if note_type =='video':
-                pass
-                # 这个展开不大准确
-                # time.sleep(1)
-                is_click=click_expand_by_coordinate(driver,'展开')
-                if is_click:
-                    time.sleep(1)
-                    #展示开必须能找到评论两个字,否则可能是点错位置了
-                    elements = driver.find_elements(AppiumBy.XPATH,"//android.widget.TextView[contains(@text, '评论')]")
-                    if len(elements) > 0:
-                        try:
-                            #评论内容太多往下拉下
-                            for i in range(20):
-                                views = driver.find_elements(AppiumBy.XPATH, "//android.view.View")
-                                for view in views:
-                                    # 优先检查 content-desc
-                                    content_desc = view.get_attribute("content-desc")
-                                    if content_desc and date_pattern.search(content_desc):
-                                        match = list(re.finditer(r'\d', content_desc))
-                                        if match:
-                                            last_digit_pos = match[-1].start()
-                                            date = content_desc[:last_digit_pos + 1].replace("编辑于","")
-                                        break
-                                if not date and len(date)<2:
-                                    scroll_small_step(driver,0.2)
-                                    time.sleep(0.1)
-                                else:
-                                    break
-                        except:
-                            pass
-                    driver.back()
-            else:
-                # 最多下划20次
-                for i in range(20):
-                    scroll_small_step(driver,0.2)
-                    time.sleep(0.1)
-                    views = driver.find_elements(AppiumBy.XPATH, "//android.view.View")
-                    for view in views:
-                        # 优先检查 content-desc
-                        content_desc = view.get_attribute("content-desc")
-
-                        if content_desc and date_pattern.search(content_desc):
-                            # date = content_desc.replace(" 已声明原创","").replace(" 内容为自主拍摄","").replace(" 已声明原创","").rstrip(' ')
-                            match = list(re.finditer(r'\d', content_desc))
-                            if match:
-                                last_digit_pos = match[-1].start()
-                                date=content_desc[:last_digit_pos + 1].replace("编辑于","")
-                            # date = content_desc.replace(" 已声明原创","").replace(" 内容为自主拍摄","").rceplace(" 已声明原创","").rstrip(' ')
-                                break
-                    if  date and len(date)>2:
-                        break
-            time.sleep(1)
+            date=detailNote.get("date")
+            #退出详情页
             driver.back()
+            if not note_id or len(note_id)<5:
+                continue
             title_ary.append(title)
             note = {
                 "title": title,
@@ -128,7 +74,7 @@ def collect_note_cards(driver,target_count: int,max_swipe_count=10):
                 "share_link": share_link
             }
             collected.append(note)
-            print(f"已获取第{len(collected)},共需要获取{target_count}篇笔记")
+            print(f"已获取{len(collected)}篇,共需要获取{target_count}篇笔记")
             if len(collected) >= target_count:
                 return collected
 

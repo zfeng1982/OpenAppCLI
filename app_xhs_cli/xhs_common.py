@@ -1,6 +1,4 @@
 import re
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from core import *
 import requests
 
@@ -32,7 +30,7 @@ def get_note_type(driver):
 def is_video_note(driver) -> bool:
     """返回 True 表示当前页面是视频笔记"""
     try:
-        driver.find_element(AppiumBy.CLASS_NAME, "com.xingin.redview.seekbar.VideoSeekBar")
+        WebDriverWait(driver, 2).until(EC.presence_of_element_located((AppiumBy.CLASS_NAME, "com.xingin.redview.seekbar.VideoSeekBar")))
         return True
     except:
         return False
@@ -50,7 +48,8 @@ def get_last_three_numbers_appium(driver):
         print(f"获取互动数据失败:{e})")
     return None
 
-def get_detail_info(driver,is_id =True):
+def get_detail_info(driver,share_btn,is_all=False):
+    # 调用这个方法之前需要确认已经进入详情页面了
     note_id = ""
     comment_num = ""
     favorites_num =""
@@ -59,7 +58,7 @@ def get_detail_info(driver,is_id =True):
     note_type="normal"
     httpurl=""
     title=""
-
+    date=""
     try:
 
         note_type=get_note_type(driver)
@@ -88,6 +87,7 @@ def get_detail_info(driver,is_id =True):
         if comment_num=="" and favorites_num=="":
             interaction_metrics=get_last_three_numbers_appium(driver)
             if interaction_metrics and len(interaction_metrics)>=3:
+                like_num = interaction_metrics[0]
                 favorites_num = interaction_metrics[1]
                 comment_num=interaction_metrics[2]
 
@@ -109,10 +109,10 @@ def get_detail_info(driver,is_id =True):
         # except Exception as e:
         #     print(f"获取点赞数失败: {e}")
         # 先用分享文本找,找不到用moreOperateIV
-        try:
-            share_btn = driver.find_element(AppiumBy.XPATH, ".//*[@content-desc='分享']")
-        except:
-            share_btn = driver.find_element(AppiumBy.ID, "com.xingin.xhs:id/moreOperateIV")
+        # try:
+        #     share_btn = driver.find_element(AppiumBy.XPATH, ".//*[@content-desc='分享']")
+        # except:
+        #     share_btn = driver.find_element(AppiumBy.ID, "com.xingin.xhs:id/moreOperateIV")
 
         if share_btn:
             share_btn.click()
@@ -126,13 +126,71 @@ def get_detail_info(driver,is_id =True):
             title = share_link[:share_link.find("http")].strip()
             # print(f"share_link:{share_link}")
             httpurl = extract_one_url(share_link)
-            if is_id:
-                lonurl = expand_short_url(httpurl)
-                #     # 4. 从链接中提取笔记ID
-                #     # 链接格式示例：https://www.xiaohongshu.com/discovery/item/笔记ID?source=...
-                match = re.search(r'/item/([a-zA-Z0-9]+)', lonurl)
-                if match:
-                    note_id = match.group(1)
+            lonurl = expand_short_url(httpurl)
+            #     # 4. 从链接中提取笔记ID
+            #     # 链接格式示例：https://www.xiaohongshu.com/discovery/item/笔记ID?source=...
+            match = re.search(r'/item/([a-zA-Z0-9]+)', lonurl)
+            if match:
+                note_id = match.group(1)
+
+
+        if is_all:
+            date_pattern = re.compile(
+                r"\d{1,2}-\d{1,2}|\d{4}-\d{1,2}-\d{1,2}|\d+分钟前|\d+小时前|刚刚|今天|昨天|\d+天前")
+            # 展开获取日期
+            if note_type == 'video':
+                pass
+                # 这个展开不大准确
+                # time.sleep(1)
+                is_click = click_expand_by_coordinate(driver, '展开')
+                if is_click:
+                    # 展示开必须能找到评论两个字,否则可能是点错位置了
+                    # elements = driver.find_elements(AppiumBy.XPATH,"//android.widget.TextView[contains(@text, '评论')]")
+                    # 用评论判断是否展开了可能不大准确,没有评论可能也展开了,先观察下
+                    els = WebDriverWait(driver, 5).until(EC.presence_of_all_elements_located(
+                        (AppiumBy.XPATH, "//android.widget.TextView[contains(@text, '评论')]")))
+                    if len(els) > 0:
+                        try:
+                            # 评论内容太多往下拉下
+                            for i in range(20):
+                                views = driver.find_elements(AppiumBy.XPATH, "//android.view.View")
+                                for view in views:
+                                    # 优先检查 content-desc
+                                    content_desc = view.get_attribute("content-desc")
+                                    if content_desc and date_pattern.search(content_desc):
+                                        match = list(re.finditer(r'\d', content_desc))
+                                        if match:
+                                            last_digit_pos = match[-1].start()
+                                            date = content_desc[:last_digit_pos + 1].replace("编辑于", "")
+                                        break
+                                if not date and len(date) < 2:
+                                    scroll_small_step(driver, 0.2)
+                                    time.sleep(0.1)
+                                else:
+                                    break
+                        except:
+                            pass
+                    driver.back()
+            else:
+                # 最多下划20次
+                for i in range(20):
+                    scroll_small_step(driver, 0.2)
+                    time.sleep(0.1)
+                    views = driver.find_elements(AppiumBy.XPATH, "//android.view.View")
+                    for view in views:
+                        # 优先检查 content-desc
+                        content_desc = view.get_attribute("content-desc")
+
+                        if content_desc and date_pattern.search(content_desc):
+                            # date = content_desc.replace(" 已声明原创","").replace(" 内容为自主拍摄","").replace(" 已声明原创","").rstrip(' ')
+                            match = list(re.finditer(r'\d', content_desc))
+                            if match:
+                                last_digit_pos = match[-1].start()
+                                date = content_desc[:last_digit_pos + 1].replace("编辑于", "")
+                                # date = content_desc.replace(" 已声明原创","").replace(" 内容为自主拍摄","").rceplace(" 已声明原创","").rstrip(' ')
+                                break
+                    if date and len(date) > 2:
+                        break
     except Exception as e:
         print(f"获取笔记详情失败:{e}")
 
@@ -140,7 +198,7 @@ def get_detail_info(driver,is_id =True):
             "title": title,
             "note_id": note_id,
             "author": "",
-            "date": "",
+            "date": date,
             "like_num": like_num,
             "comment_num": comment_num,
             "favorites_num": favorites_num,
@@ -150,16 +208,39 @@ def get_detail_info(driver,is_id =True):
 
 def detail_click_suc(driver):
     try:
-        WebDriverWait(driver, 5).until(EC.presence_of_element_located((AppiumBy.ID, "com.xingin.xhs:id/moreOperateIV")))
-        return True
+        share_btn=WebDriverWait(driver, 5).until(EC.presence_of_element_located((AppiumBy.ID, "com.xingin.xhs:id/moreOperateIV")))
+        return True,share_btn
     except:
         pass
     # 用是否出现评论来判断详情页，是否点击成功
     try:
-        WebDriverWait(driver, 5).until(EC.presence_of_element_located( (AppiumBy.XPATH, ".//*[@content-desc='分享']")))
-        return  True
+        share_btn=WebDriverWait(driver, 3).until(EC.presence_of_element_located( (AppiumBy.XPATH, ".//*[@content-desc='分享']")))
+        return True, share_btn
     except:
        pass
-    return False
+
+    try:
+       share_btn=WebDriverWait(driver, 1).until(EC.presence_of_element_located((AppiumBy.XPATH, "//android.widget.ImageView[@content-desc='分享']")))
+       return True, share_btn
+    except:
+        pass
+
+    # # 用是否出现评论来判断详情页，是否点击成功
+    # try:
+    #     WebDriverWait(driver, 10).until(EC.presence_of_element_located(
+    #         (AppiumBy.XPATH, "//android.widget.Button[starts-with(@content-desc, '评论')]")))
+    #     return True
+    # except:
+    #     pass
+    #
+    #     # 不可评论的详情页
+    # try:
+    #     WebDriverWait(driver, 10).until(EC.presence_of_element_located(
+    #         (AppiumBy.XPATH, "//android.widget.TextView[contains(@text, '评论')]")))
+    #     return True
+    # except:
+    #     pass
+
+    return False,None
 
 

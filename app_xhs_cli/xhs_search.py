@@ -20,19 +20,8 @@ def collect_note_search_cards(driver,target_count: int,max_swipe_count=10):
     wait.until(EC.presence_of_element_located(
         (AppiumBy.XPATH, "//androidx.recyclerview.widget.RecyclerView/android.widget.FrameLayout")
     ))
-    # 等待搜索结果页加载完成（例如等待 RecyclerView 出现）
-    recycler_xpath = "//androidx.recyclerview.widget.RecyclerView"
-    wait.until(EC.presence_of_element_located((AppiumBy.XPATH, recycler_xpath)))
-
 
     collected = []  # 存放已抓取卡片的数据
-
-
-    # 获取屏幕尺寸，用于滚动
-    size = driver.get_window_size()
-    start_x = size["width"] // 2
-    start_y = int(size["height"] * 0.8)
-    end_y = int(size["height"] * 0.2)
 
     scroll_small_step(driver)
     time.sleep(2)  # 额外等待页面渲染
@@ -40,8 +29,7 @@ def collect_note_search_cards(driver,target_count: int,max_swipe_count=10):
     swipe_count=0
     while len(collected) < target_count:
         # 2. 获取当前屏幕内所有可能的卡片容器（RecyclerView的直接子FrameLayout）
-        cards = driver.find_elements(AppiumBy.XPATH,
-                                     "//androidx.recyclerview.widget.RecyclerView/android.widget.FrameLayout")
+        cards =wait.until(EC.presence_of_all_elements_located((AppiumBy.XPATH,  "//androidx.recyclerview.widget.RecyclerView/android.widget.FrameLayout")))
 
         for card in cards:
             # 递归获取所有TextView和ImageView
@@ -50,7 +38,7 @@ def collect_note_search_cards(driver,target_count: int,max_swipe_count=10):
 
             # text_views[0].click()
 
-            if not text_views or not image_views:
+            if not text_views or not image_views or len(text_views)<4 or len(image_views)<2:
                 continue  # 缺少文本或图片，直接跳过
 
             # 解析日期和点赞数
@@ -65,30 +53,28 @@ def collect_note_search_cards(driver,target_count: int,max_swipe_count=10):
                     # 防止 list index out of range
                     if idx<2 or (idx>view_len-1):
                         continue
+                    date = text
                     title=text_views[idx-2].text.strip()
                     author = text_views[idx - 1].text.strip()
+                    like_num = text_views[idx + 1].text.strip()
                     # 标题已经存在则跳过.或者出现错误位的情况,如标题是数字或者日期,作者错位
                     if title in title_ary or title.isdigit() or date_pattern.search(title) or author=="关注":
                         # print(f"title continue:{title} author:{author}")
                         continue
                     tv.click()
-                    if not detail_click_suc(driver):
+                    dsc, share_btn = detail_click_suc(driver)
+                    if not dsc:
                         print(f"详情页不可获取,collect_note_cards:{title}")
                         # 整张卡片都不要
                         break
-                    detailNote = get_detail_info(driver)
+                    detailNote = get_detail_info(driver,share_btn)
                     note_id = detailNote.get("note_id")
                     note_type = detailNote.get("note_type")
                     comment_num = detailNote.get("comment_num")
                     favorites_num = detailNote.get("favorites_num")
                     share_link = detailNote.get("share_link")
-
-
                     driver.back()
                     title_ary.append(title)
-
-                    date = text
-                    like_num =text_views[idx+1].text.strip()
                     note = {
                         "title": title,
                         "note_id": note_id,
@@ -102,6 +88,7 @@ def collect_note_search_cards(driver,target_count: int,max_swipe_count=10):
                     }
 
                     collected.append(note)
+                    print(f"已获取{len(collected)}篇,共需要获取{target_count}篇笔记")
                     # 放够了直接返回吧
                     if len(collected) >= target_count:
                         return collected
@@ -109,13 +96,13 @@ def collect_note_search_cards(driver,target_count: int,max_swipe_count=10):
         if  swipe_count>=max_swipe_count:
             break
         # 4. 滚动加载更多
-        driver.swipe(start_x, start_y, start_x, end_y, duration=800)
-        time.sleep(2)
+        scroll_small_step(driver, 0.2)
         swipe_count=swipe_count+1
     return collected
 
 def run(args):
     driver=get_driver()
+    start_time = time.time()
     try:
         keyword = args.keyword  # 字符串或 None
         wait = WebDriverWait(driver, 10)
@@ -208,10 +195,14 @@ def run(args):
                     latest_btns[0].click()
                     time.sleep(1)#点击后等待
 
-            notes=collect_note_search_cards(driver,args.limit)
-            print(f"notes len:{len(notes)}")
+            notes=collect_note_search_cards(driver,args.limit,30)
             result["notes"] = notes
         print(json.dumps(result, ensure_ascii=False, indent=2))
+        elapsed = time.time() - start_time
+        hours, rem = divmod(elapsed, 3600)
+        minutes, seconds = divmod(rem, 60)
+        if args.type == 'note':
+            print(f"读取[搜索]笔记{len(result.get("notes"))}篇 总耗时: {int(hours):02d}:{int(minutes):02d}:{seconds:05.2f}")
     except Exception as e:
         print(f"发生未知错误: {e}")
 
