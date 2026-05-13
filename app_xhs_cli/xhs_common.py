@@ -208,7 +208,7 @@ def get_detail_info(driver,share_btn,is_all=False):
 
 def detail_click_suc(driver):
     try:
-        share_btn=WebDriverWait(driver, 5).until(EC.presence_of_element_located((AppiumBy.ID, "com.xingin.xhs:id/moreOperateIV")))
+        share_btn=WebDriverWait(driver, 7).until(EC.presence_of_element_located((AppiumBy.ID, "com.xingin.xhs:id/moreOperateIV")))
         return True,share_btn
     except:
         pass
