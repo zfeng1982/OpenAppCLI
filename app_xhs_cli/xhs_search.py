@@ -1,7 +1,15 @@
 import sys
+import time
 
 from .xhs_common import *
-
+def back_search_suc(driver):
+    try:
+        WebDriverWait(driver, 1).until(
+            EC.presence_of_element_located((AppiumBy.XPATH, "//android.widget.TextView[@text='问一问']")))
+        return True
+    except:
+        pass
+    return  False
 def collect_note_search_cards(driver,target_count: int,max_swipe_count=10):
     """
     滚动并收集小红书笔记卡片信息
@@ -32,7 +40,6 @@ def collect_note_search_cards(driver,target_count: int,max_swipe_count=10):
     while len(collected) < target_count:
         # 2. 获取当前屏幕内所有可能的卡片容器（RecyclerView的直接子FrameLayout）
         cards =wait.until(EC.presence_of_all_elements_located((AppiumBy.XPATH,  "//androidx.recyclerview.widget.RecyclerView/android.widget.FrameLayout")))
-
         for card in cards:
             # 递归获取所有TextView和ImageView
             try:
@@ -41,7 +48,6 @@ def collect_note_search_cards(driver,target_count: int,max_swipe_count=10):
             except Exception as e:
                 print(f"text_views/image_views: {e}")
                 break
-
 
             # text_views[0].click()
 
@@ -68,6 +74,7 @@ def collect_note_search_cards(driver,target_count: int,max_swipe_count=10):
                     if title in title_ary or title.isdigit() or date_pattern.search(title) or author=="关注":
                         # print(f"title continue:{title} author:{author}")
                         continue
+                    # print(f"点击详情{title}")
                     tv.click()
                     dsc, share_btn = detail_click_suc(driver)
                     if not dsc:
@@ -76,14 +83,21 @@ def collect_note_search_cards(driver,target_count: int,max_swipe_count=10):
                         # tv.click()
                         # break
                         sys.exit(1)
-
                     detailNote = get_detail_info(driver,share_btn)
                     note_id = detailNote.get("note_id")
                     note_type = detailNote.get("note_type")
                     comment_num = detailNote.get("comment_num")
                     favorites_num = detailNote.get("favorites_num")
                     share_link = detailNote.get("share_link")
+                    time.sleep(0.5)
+                    # print(f"点击返回:{title}")
                     driver.back()
+                    # 确认返回成功否则系统直接退出
+                    if not back_search_suc(driver):
+                        print(f"返回失败,collect_note_cards:{title}")
+                        sys.exit(1)
+                    # time.sleep(0.5)
+                    # print(f"已返回:{title}")
                     title_ary.append(title)
                     note = {
                         "title": title,
@@ -96,9 +110,8 @@ def collect_note_search_cards(driver,target_count: int,max_swipe_count=10):
                         "note_type": note_type,
                         "share_link": share_link
                     }
-
                     collected.append(note)
-                    print(f"已获取{len(collected)}篇,共需要获取{target_count}篇笔记")
+                    get_progress(target_count,len(collected))
                     # 放够了直接返回吧
                     if len(collected) >= target_count:
                         return collected
@@ -106,7 +119,7 @@ def collect_note_search_cards(driver,target_count: int,max_swipe_count=10):
         if  swipe_count>=max_swipe_count:
             break
         # 4. 滚动加载更多
-        scroll_small_step(driver,0.15)
+        scroll_small_step(driver,0.2)
         swipe_count=swipe_count+1
     return collected
 
@@ -214,5 +227,5 @@ def run(args):
         if args.type == 'note':
             print(f"读取[搜索]笔记{len(result.get("notes"))}篇 总耗时: {int(hours):02d}:{int(minutes):02d}:{seconds:05.2f}")
     except Exception as e:
-        print(f"发生未知错误: {e}")
+        print(f"发生未知错误a: {e}")
 

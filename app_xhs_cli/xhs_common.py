@@ -1,4 +1,6 @@
 import re
+import time
+
 from core import *
 import requests
 
@@ -34,6 +36,44 @@ def is_video_note(driver) -> bool:
         return True
     except:
         return False
+def get_address(driver,type:str):
+    location=""
+    distance=""
+    try:
+        if type=="video":
+            # 定位所有符合条件的 LinearLayout
+            xpath = "//android.widget.LinearLayout[count(child::*) >= 4 and child::*[1][self::android.widget.ImageView] and child::*[2][self::android.widget.TextView] and child::*[3][self::android.view.View] and child::*[4][self::android.widget.TextView]]"
+            layouts = driver.find_elements(AppiumBy.XPATH, xpath)
+            for layout in layouts:
+                imgs = layout.find_elements(AppiumBy.XPATH, ".//android.widget.ImageView")
+                # 查找所有 TextView
+                texts = layout.find_elements(AppiumBy.XPATH, ".//android.widget.TextView")
+                # 查找所有 View（注意：android.view.View 是通用视图，可能包含很多元素，但这里特指你 XML 中的圆点分隔符等）
+                views = layout.find_elements(AppiumBy.XPATH, ".//android.view.View")
+
+                # 如果需要按顺序处理，可以遍历组合
+                if len(imgs)==1 and  len(texts)==2 and len(views)==1:
+                    location=texts[0].text
+                    distance=texts[1].text
+        else:
+            layouts = driver.find_elements(AppiumBy.XPATH, "//android.widget.LinearLayout")
+            for ll in layouts:
+                children = ll.find_elements(AppiumBy.XPATH, "//*")
+                if len(children)==6 and children[2].text.strip()=='地点':
+                    location=children[4].text.strip()
+                    distance=children[5].text.strip().replace('·',"")
+
+            # # 找到所有文本为“地点”的TextView，且前一个兄弟元素是ImageView
+            # text_views = driver.find_elements(AppiumBy.XPATH, "//android.widget.TextView")
+            # for idx, tv in enumerate(text_views):
+            #     if tv.text == "地点":
+            #         location = text_views[idx+1].text
+            #         distance = text_views[idx+2].text
+    except Exception as e:
+        location=distance=""
+        print(f"没有Lbs:{location}|{distance}")
+        pass
+    return location,distance
 #一般用于获取广告的喜欢数,收藏数和评论数,对应的index分别是0,1,2
 def get_last_three_numbers_appium(driver):
     try:
@@ -47,7 +87,6 @@ def get_last_three_numbers_appium(driver):
     except Exception as e:
         print(f"获取互动数据失败:{e})")
     return None
-
 def get_detail_info(driver,share_btn,is_all=False):
     # 调用这个方法之前需要确认已经进入详情页面了
     note_id = ""
@@ -59,6 +98,8 @@ def get_detail_info(driver,share_btn,is_all=False):
     httpurl=""
     title=""
     date=""
+    location=""
+    distance=""
     try:
 
         note_type=get_note_type(driver)
@@ -142,6 +183,8 @@ def get_detail_info(driver,share_btn,is_all=False):
                 pass
                 # 这个展开不大准确
                 # time.sleep(1)
+                #//得到地址
+                location,distance=get_address(driver,"video")
                 is_click = click_expand_by_coordinate(driver, '展开')
                 if is_click:
                     # 展示开必须能找到评论两个字,否则可能是点错位置了
@@ -187,7 +230,7 @@ def get_detail_info(driver,share_btn,is_all=False):
                             if match:
                                 last_digit_pos = match[-1].start()
                                 date = content_desc[:last_digit_pos + 1].replace("编辑于", "")
-                                # date = content_desc.replace(" 已声明原创","").replace(" 内容为自主拍摄","").rceplace(" 已声明原创","").rstrip(' ')
+                                location, distance = get_address(driver, "narmal")
                                 break
                     if date and len(date) > 2:
                         break
@@ -202,28 +245,36 @@ def get_detail_info(driver,share_btn,is_all=False):
             "like_num": like_num,
             "comment_num": comment_num,
             "favorites_num": favorites_num,
+            "location": location,
+            "distance": distance,
             "note_type": note_type,
             "share_link": httpurl
             }
 
 def detail_click_suc(driver):
     try:
-        share_btn=WebDriverWait(driver, 7).until(EC.presence_of_element_located((AppiumBy.ID, "com.xingin.xhs:id/moreOperateIV")))
+        share_btn = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((AppiumBy.XPATH, "//android.widget.ImageView[@content-desc='分享']")))
+        return True, share_btn
+    except:
+        print("detail_click_suc ImageView")
+        pass
+
+    try:
+        share_btn=WebDriverWait(driver, 5).until(EC.presence_of_element_located((AppiumBy.ID, "com.xingin.xhs:id/moreOperateIV")))
         return True,share_btn
     except:
+        print("detail_click_suc moreOperateIV")
         pass
     # 用是否出现评论来判断详情页，是否点击成功
     try:
         share_btn=WebDriverWait(driver, 3).until(EC.presence_of_element_located( (AppiumBy.XPATH, ".//*[@content-desc='分享']")))
         return True, share_btn
     except:
+       print("detail_click_suc content-desc")
        pass
 
-    try:
-       share_btn=WebDriverWait(driver, 1).until(EC.presence_of_element_located((AppiumBy.XPATH, "//android.widget.ImageView[@content-desc='分享']")))
-       return True, share_btn
-    except:
-        pass
+
 
     # # 用是否出现评论来判断详情页，是否点击成功
     # try:
@@ -243,4 +294,29 @@ def detail_click_suc(driver):
 
     return False,None
 
+def get_progress(target_count,completed_count):
+    # print("\033[F\033[K", end="")
+    print( f"共需要获取{target_count}篇笔记,目前进度{round(completed_count/ target_count * 100)}% ({completed_count}篇)...")
 
+def find_index_tab(driver,tab_text:str):
+    # 等待所有 Tab 加载完成
+    tabs = WebDriverWait(driver, 10).until(
+        EC.presence_of_all_elements_located((AppiumBy.XPATH, "//androidx.appcompat.app.ActionBar.Tab"))
+    )
+    # 遍历找到“发现”所在位置，然后取前一个和后一个
+    found_tab = None
+    for idx, tab in enumerate(tabs):
+        #用发现作为锚定标识
+        content=tab.get_attribute("content-desc")
+        if content == "发现":
+            if tab_text == "发现":
+                found_tab = tab
+                break
+            elif tab_text == "关注" and idx > 0:
+                found_tab = tabs[idx - 1]  # 关注（文本可变）
+                break
+            elif tab_text=="lbs" and  idx < len(tabs) - 1:
+                found_tab = tabs[idx + 1]  # LBS如深圳（文本可变）
+                break
+
+    return found_tab

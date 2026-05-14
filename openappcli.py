@@ -17,6 +17,7 @@ from app_xhs_cli import xhs_search
 from app_xhs_cli import xhs_details
 from app_xhs_cli import xhs_discover
 from app_xhs_cli import xhs_followed
+from app_xhs_cli import xhs_lbs
 from core import *
 
 
@@ -70,7 +71,7 @@ def main():
     xhs_details_parser.add_argument("--dir",required=True,help="文件保存目录包括视频,图片(必填)")
 
     xhs_index_parser = subparsers.add_parser("xhs-index",help="首页")
-    xhs_index_parser.add_argument("type",  choices=["discover", "followed"], help="关注,发现")
+    xhs_index_parser.add_argument("type",  choices=["discover", "followed","lbs"], help="关注,发现,LBS")
     xhs_index_parser.add_argument("--limit",  type=int,  default=10, help="返回笔记条数")
 
     args = parser.parse_args()
@@ -100,8 +101,7 @@ def main():
             launch_app.run(args)
         # python openappcli.py sps search.xml
         elif args.cli == "sps":
-            driver = get_driver()
-            save_page_src.run(driver,args)
+            save_page_src.run(args)
         # python openappcli.py xhs-publish album --count 2  --title "英国法院裁定三星向中兴赔偿" --content "从公开消息看，中兴通讯在德国、UPC和巴西等法院判决获得了支持。从外媒报道看，从2025年年初，德国、UPC、巴西等法院陆续判决，均支持中兴立场和报价。" --topics "新能源|五一假期"
         # python openappcli.py xhs-publish text --txttype idea --itxt "多国法院支持中兴通讯的诉求" --title "多国法院支持中兴通讯的诉求" --content "更值得注意的是，英国法院自己在审理“Optis VS Apple”案时也曾使用Top-down进行交叉验证。" --topics "人山人海|五一假期"
         # python openappcli.py xhs-publish text --txttype longtxt --topics "辛芷蕾|五一假期" --title "辛芷蕾五一节和闺蜜自驾游，骑着10万元的自行车，还撞树手臂流血" --content "五一小长假大家都玩嗨了吧，平时忙到脚不沾地的明星，也终于能抽出时间好好放松了。咱们熟悉的女演员辛芷蕾，这次她这次晒图不小心把自己开的座驾露了出来，蓝色的家用车，市价大概在28万元左右，不算什么夸张的顶级豪车，走的就是实用舒适路线。大块头的车衬得人愈发小巧，辛芷蕾往那儿一站，气质优雅妩媚，谁能猜出来她已经40岁了。估计是常年练瑜伽的缘故，她的身材紧致利落，连一点多余的小肚子都没有，状态好到不像话。这次到了目的地，她先拉素颜的辛芷蕾皮肤状态依旧能打，白皙细腻不说，脸上连个明显的皱纹斑点都找不到，羡煞了一堆天天熬大夜的打工人。平时在娱乐圈轧戏跑活动，连睡个完整的好觉都难，能这么安安静静跟闺蜜坐一下午吹吹风，这种松弛感真的太戳人了"
@@ -117,9 +117,10 @@ def main():
             # python openappcli.py xhs-search note --keyword "我拍到了海鸥雨" --order com --limit 5
             # python openappcli.py xhs-search note --keyword "信息蒸馏研究所" --order com --limit 5
             # python openappcli.py xhs-search note --keyword "辛芷蕾" --limit 5
-            # python openappcli.py xhs-search note --keyword "普拉提" --limit 5
+            # python openappcli.py xhs-search note --keyword "普拉提" --limit 50
             # python openappcli.py xhs-search note --keyword "迷人又危险的特工姐姐登场" --limit 2
             # python openappcli.py xhs-search note --keyword "蜜桃女孩" --limit 5
+            # python openappcli.py xhs-search note --keyword "我的运动日常分享 SS潘泥" --limit 5
             elif args.cli == "xhs-search":
                 xhs_search.run(args)
             #
@@ -142,6 +143,9 @@ def main():
                     xhs_discover.run(args)
                 elif args.type=="followed":
                     xhs_followed.run(args)
+                #python openappcli.py xhs-index local --limit 5
+                elif args.type=="lbs":
+                    xhs_lbs.run(args)
 
         else:
             parser.print_help()
