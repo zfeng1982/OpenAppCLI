@@ -335,3 +335,101 @@ def is_on_local(driver,local):
     except:
         print(f"没用选中:{local}")
         pass
+def get_user_index(driver):
+    # xpath = "//android.widget.LinearLayout[count(child::*) >= 3 and child::*[1][self::android.view.ViewGroup] and child::*[2][self::android.widget.LinearLayout] and child::*[3][self::android.widget.LinearLayout]]"
+    #
+    # # 等待至少一个元素出现，并获取所有匹配的元素（返回列表）
+    # containers = WebDriverWait(driver, 10).until(
+    #     EC.presence_of_all_elements_located((AppiumBy.XPATH, xpath))
+    # )
+    # # 获取长度
+    # print(f"找到 {len(containers)} 个匹配的布局")
+    usr={}
+    try:
+        container = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((
+                AppiumBy.XPATH,
+                "//android.widget.LinearLayout[count(child::*) >= 3 and child::*[1][self::android.view.ViewGroup] and child::*[2][self::android.widget.LinearLayout] and child::*[3][self::android.widget.LinearLayout]]"
+            ))
+        )
+        if container:
+            nickname=""
+            ip=""
+            job=""
+            follow_count=""
+            fans_count=""
+            likes_count=""
+            signature=""
+            # age=""
+            # location=""
+            other_info=""
+            share_link=""
+            xhs_id=""
+            try:
+                children = container.find_elements(AppiumBy.XPATH, "//*")
+                # print(f"children:{len(children)}")
+                # if len(children) == 6 and children[2].text.strip() == '地点':
+                # print("找到用户首页LinearLayout")
+                # 获取头像区 ViewGroup
+                view_group = container.find_element(AppiumBy.XPATH, "//android.view.ViewGroup")
+                nickname = view_group.find_element(AppiumBy.XPATH, "//android.widget.TextView[1]").text
+                ip = view_group.find_element(AppiumBy.XPATH, "//android.widget.TextView[2]").text
+                job = view_group.find_element(AppiumBy.XPATH, "//android.widget.LinearLayout/android.widget.TextView").text
+                if "小红书号：" in job:
+                    xhs_id=job.replace("小红书号：","")
+                    job = ""
+
+                # print(f"nickname:{nickname} ip:{ip} job:{job}")
+                # # 获取统计数据 LinearLayout（关注/粉丝/获赞）
+                stats_layout = container.find_element(AppiumBy.XPATH, "//android.widget.LinearLayout[1]")
+                follow_count=stats_layout.find_element(AppiumBy.XPATH, "//android.widget.Button[1]/android.widget.TextView[1]").text
+                fans_count=stats_layout.find_element(AppiumBy.XPATH, "//android.widget.Button[2]/android.widget.TextView[1]").text
+                likes_count=stats_layout.find_element(AppiumBy.XPATH, "//android.widget.Button[3]/android.widget.TextView[1]").text
+                # print(f"follow_count:{follow_count} fans_count:{fans_count} likes_count:{likes_count}")
+                # # 获取签名/年龄/国家 LinearLayout
+                info_layout = container.find_element(AppiumBy.XPATH, "//android.widget.LinearLayout[2]")
+                signature=info_layout.find_element(AppiumBy.XPATH, "//android.widget.TextView").text
+
+                textviews=info_layout.find_elements(AppiumBy.XPATH, "//android.widget.LinearLayout//android.widget.TextView")
+                for i, tv in enumerate(textviews):
+                    text = tv.text.strip()
+                    if text and text!="" and text!=signature and text!="•":
+                        other_info=other_info + ("|" + text if other_info else text)
+                # location=info_layout.find_element(AppiumBy.XPATH, "//android.widget.LinearLayout//android.widget.LinearLayout[2]").get_attribute("content-desc")
+                # print(f"signature:{signature} age:{age} location:{location}")
+
+                more_btn = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((AppiumBy.XPATH, "//android.widget.ImageView[@content-desc='更多']"))
+                )
+                more_btn.click()
+                # 2. 等待底部菜单出现，并点击“复制链接”选项
+                copy_link = WebDriverWait(driver, 5).until(
+                    EC.element_to_be_clickable((AppiumBy.XPATH, "//android.widget.TextView[@text='复制链接']"))
+                )
+                copy_link.click()
+                share_link = driver.get_clipboard_text().split("?", 1)[0]
+                # httpurl = extract_one_url(share_link)
+                # lonurl = expand_short_url(httpurl)
+                # print(f"share_link:{share_link}")
+                # print(f"httpurl:{httpurl} ")
+                # print(f"lonurl:{lonurl}")
+
+            except:
+                pass
+            usr={
+                "user_name": nickname,
+                "xhs_id": xhs_id,
+                "ip_location": ip,
+                "job": job,
+                "follow_count": follow_count,
+                "fans_count": fans_count,
+                "likes_collect": likes_count,
+                "signature": signature,
+                "share_link": share_link,
+                "other_info": other_info,
+            }
+    except:
+        print(f"用户首页LinearLayout没找到")
+        pass
+    return usr
+

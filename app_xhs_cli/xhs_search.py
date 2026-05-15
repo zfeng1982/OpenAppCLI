@@ -159,43 +159,7 @@ def run(args):
             # 有搜索结果
             if first_user:
                 first_user[0].click()
-                print(1)
-                textView = wait.until(EC.presence_of_all_elements_located((AppiumBy.XPATH, "//android.widget.TextView")))
-                print(2)
-                # 用户名
-                use_name=textView[0].text.strip()
-                # # 职业
-                # print(f"text1:{textView[1].text}")
-                # # 简介
-                # print(f"desc:{textView[5].text}")
-                # 小红书号
-                xhs_id_elem = driver.find_element(AppiumBy.XPATH, "//android.widget.TextView[contains(@text, '小红书号：')]")
-                xhs_id = xhs_id_elem.text.split('：')[-1].strip()
-                print(3)
-                # IP属地
-                ip_elem = driver.find_element(AppiumBy.XPATH, "//android.widget.TextView[contains(@text, 'IP属地：')]")
-                ip_location = ip_elem.text.split('：')[-1].strip()
-                print(4)
-                follow_btn = driver.find_element(AppiumBy.XPATH,"//android.widget.Button[.//android.widget.TextView[@text='关注']]")
-                follow_count = follow_btn.find_element(AppiumBy.XPATH, ".//android.widget.TextView[1]").text
-                print(5)
-                # 粉丝数（取按钮内第一个 TextView 的数字文本）
-                fans_btn = driver.find_element(AppiumBy.XPATH, "//android.widget.Button[contains(@content-desc, '粉丝')]")
-                fans_count = fans_btn.find_element(AppiumBy.XPATH, ".//android.widget.TextView[1]").text
-                print(6)
-                # 获赞与收藏（取按钮内第一个 TextView 的数字文本）
-                likes_btn = driver.find_element(AppiumBy.XPATH,
-                                                "//android.widget.Button[contains(@content-desc, '获赞与收藏')]")
-                likes_collect = likes_btn.find_element(AppiumBy.XPATH, ".//android.widget.TextView[1]").text
-
-                result["user"] = {
-                    "user_name": use_name,
-                    "xhs_id": xhs_id,
-                    "ip_location": ip_location,
-                    "follow_count": follow_count,
-                    "fans_count": fans_count,
-                    "likes_collect": likes_collect,
-                }
+                result["user"] =get_user_index(driver)
         # 搜索笔记
         elif args.type == 'note':
             hot_desc=""
@@ -226,6 +190,8 @@ def run(args):
         elapsed = time.time() - start_time
         hours, rem = divmod(elapsed, 3600)
         minutes, seconds = divmod(rem, 60)
+        if args.type == 'user':
+            print(f"搜索用户信息总耗时: {int(hours):02d}:{int(minutes):02d}:{seconds:05.2f}")
         if args.type == 'note':
             print(f"读取[搜索]笔记{len(result.get("notes"))}篇 总耗时: {int(hours):02d}:{int(minutes):02d}:{seconds:05.2f}")
     except Exception as e:
