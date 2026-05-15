@@ -78,7 +78,7 @@ def collect_note_cards(driver,target_count: int,max_swipe_count=10):
                 "share_link": share_link
             }
             collected.append(note)
-            print(f"已获取{len(collected)}篇,共需要获取{target_count}篇笔记")
+            get_progress(target_count, len(collected))
             if len(collected) >= target_count:
                 return collected
 

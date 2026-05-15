@@ -1,4 +1,5 @@
 import re
+import sys
 import time
 
 from core import *
@@ -124,10 +125,11 @@ def get_detail_info(driver,share_btn,is_all=False):
 
         #用于广告详情页的互动指标
         # print(f"comment_num:{comment_num},favorites_num:{favorites_num}")
-        if comment_num=="" and favorites_num=="":
-            interaction_metrics=get_last_three_numbers_appium(driver)
-            if interaction_metrics and len(interaction_metrics)>=3:
-                like_num = interaction_metrics[0]
+
+        interaction_metrics=get_last_three_numbers_appium(driver)
+        if interaction_metrics and len(interaction_metrics)>=3:
+            like_num = interaction_metrics[0]
+            if comment_num == "" and favorites_num == "":
                 favorites_num = interaction_metrics[1]
                 comment_num=interaction_metrics[2]
 
@@ -433,3 +435,78 @@ def get_user_index(driver):
         pass
     return usr
 
+def get_user_note_list(driver,author,target_count: int,max_swipe_count=10):
+    collected = []  # 存放已抓取卡片的数据
+    title_ary = []  # 用标题来去重
+    swipe_count = 0
+    while len(collected) < target_count:
+        # 定位 content-desc 以“笔记”或“视频”开头的元素
+        xpath = "//*[starts-with(@content-desc, '笔记') or starts-with(@content-desc, '视频')]"
+        # elements = driver.find_elements(AppiumBy.XPATH, xpath)
+        elements = WebDriverWait(driver, 5).until(EC.presence_of_all_elements_located((AppiumBy.XPATH, xpath)))
+        # desc_list = [elem.get_attribute("content-desc") for elem in elements]
+        for elem in elements:
+            try:
+                temp_title = elem.get_attribute("content-desc")
+            except:
+                break
+
+            # 存在就不要放子
+            if temp_title in title_ary or temp_title == "" or temp_title is None :
+                continue
+            title_ary.append(temp_title)
+            elem.click()
+            dsc, share_btn = detail_click_suc(driver)
+            if not dsc:
+                print(f"详情页不可获取,get_user_note_list:{temp_title}")
+                continue
+            detailNote = get_detail_info(driver, share_btn, True)
+            note_id = detailNote.get("note_id")
+            title = detailNote.get("title")
+            note_type = detailNote.get("note_type")
+            comment_num = detailNote.get("comment_num")
+            favorites_num = detailNote.get("favorites_num")
+            share_link = detailNote.get("share_link")
+            like_num = detailNote.get("like_num")
+            date = detailNote.get("date")
+            location = detailNote.get("location")
+            distance = detailNote.get("distance")
+            # 退出详情页
+            driver.back()
+            # 退出详情页是否成功
+            note_tab = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((AppiumBy.XPATH, "//android.widget.TextView[@text='笔记']"))
+            )
+            # 确认返回成功否则系统直接退出
+            if not note_tab:
+                print(f"返回失败,get_user_note_list:{temp_title}")
+                sys.exit(1)
+
+            if not note_id or len(note_id) < 5:
+                continue
+
+            note = {
+                "title": title,
+                "note_id": note_id,
+                "author": author,
+                "date": date,
+                "like_num": like_num,
+                "comment_num": comment_num,
+                "favorites_num": favorites_num,
+                "location": location,
+                "distance": distance,
+                "note_type": note_type,
+                "share_link": share_link
+            }
+            collected.append(note)
+            get_progress(target_count, len(collected))
+            if len(collected) >= target_count:
+                return collected
+
+        if swipe_count >= max_swipe_count:
+            break
+        # 4. 滚动加载更多
+        scroll_small_step(driver, 0.2)
+        time.sleep(1)
+        swipe_count = swipe_count + 1
+    return collected
