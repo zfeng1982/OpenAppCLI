@@ -253,7 +253,7 @@ def get_detail_info(driver,share_btn,is_all=False):
             }
 
 def detail_click_suc(driver):
-    # 时间快速的找到,没找到再来一次
+    #短时间快速的找到,没找到再来一次
     for i in range(1, 4):
         timout=1*i
         try:
