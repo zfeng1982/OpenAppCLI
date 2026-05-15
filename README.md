@@ -12,4 +12,4 @@
 - xhs-publish: Publish content (supports types: albumfor gallery selection, textfor ideas/long-form articles).
 - xhs-search: Search for users and notes/posts.
 - xhs-details: Retrieve details by note ID (extract text, download videos and images).
-- xhs-index: Fetch the homepage feed (Discover and Following lists).
+- xhs-index: Fetch the homepage feed (Discover, Following, LBS lists).

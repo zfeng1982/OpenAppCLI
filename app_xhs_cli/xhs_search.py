@@ -159,7 +159,13 @@ def run(args):
             # 有搜索结果
             if first_user:
                 first_user[0].click()
-                result["user"] =get_user_index(driver)
+
+                usr =get_user_index(driver)
+                result["user"] =usr
+                result["notes"]=[]
+                if args.note:
+                    notes = get_user_note_list(driver,usr.get("user_name"), args.limit, 70)
+                    result["notes"]=notes
         # 搜索笔记
         elif args.type == 'note':
             hot_desc=""
@@ -191,7 +197,7 @@ def run(args):
         hours, rem = divmod(elapsed, 3600)
         minutes, seconds = divmod(rem, 60)
         if args.type == 'user':
-            print(f"搜索用户信息总耗时: {int(hours):02d}:{int(minutes):02d}:{seconds:05.2f}")
+            print(f"搜索用户信息,笔记{len(result["notes"])}篇 总耗时: {int(hours):02d}:{int(minutes):02d}:{seconds:05.2f}")
         if args.type == 'note':
             print(f"读取[搜索]笔记{len(result.get("notes"))}篇 总耗时: {int(hours):02d}:{int(minutes):02d}:{seconds:05.2f}")
     except Exception as e:

@@ -62,7 +62,8 @@ def main():
     xhs_search_parser = subparsers.add_parser("xhs-search", help="小红书搜索笔记")
     xhs_search_parser.add_argument("type", choices=["user", "note"], help="搜索类型")
     xhs_search_parser.add_argument("--keyword", help="搜索关键字")
-    xhs_search_parser.add_argument("--order", choices=["com", "new"], default="com", help="排序方式,默认为")
+    xhs_search_parser.add_argument( "--note",action="store_true",default=False,help="是否需要日志列表，默认不需要")
+    xhs_search_parser.add_argument("--order", choices=["com", "new"], default="com", help="排序方式,默认为(只用搜索日志)")
     xhs_search_parser.add_argument("--limit", type=int, default=10, help="返回笔记条数")
 
     # 小红书根据笔记标题进入笔记详情页
