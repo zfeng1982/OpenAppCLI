@@ -362,6 +362,8 @@ def click_expand_by_coordinate(driver, text, offset_pixels=10):
     点击其右下角区域（靠右偏移 offset_pixels 像素），以精确点到“展开”文字。
     """
     try:
+        # 点击展开前先等一下,展开开两个字在手机上可能会跳行
+        time.sleep(1)
         expand_elem = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((AppiumBy.XPATH, f"//android.widget.TextView[contains(@text, '{text}') and @clickable='true']"))
         )
