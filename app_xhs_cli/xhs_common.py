@@ -33,7 +33,7 @@ def get_note_type(driver):
 def is_video_note(driver) -> bool:
     """返回 True 表示当前页面是视频笔记"""
     try:
-        WebDriverWait(driver, 2).until(EC.presence_of_element_located((AppiumBy.CLASS_NAME, "com.xingin.redview.seekbar.VideoSeekBar")))
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((AppiumBy.CLASS_NAME, "com.xingin.redview.seekbar.VideoSeekBar")))
         return True
     except:
         return False
@@ -253,27 +253,30 @@ def get_detail_info(driver,share_btn,is_all=False):
             }
 
 def detail_click_suc(driver):
-    try:
-        share_btn = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((AppiumBy.XPATH, "//android.widget.ImageView[@content-desc='分享']")))
-        return True, share_btn
-    except:
-        print("detail_click_suc ImageView")
-        pass
+    # 时间快速的找到,没找到再来一次
+    for i in range(1, 4):
+        timout=1*i
+        try:
+            share_btn = WebDriverWait(driver, timout).until(
+                EC.presence_of_element_located((AppiumBy.XPATH, "//android.widget.ImageView[@content-desc='分享']")))
+            return True, share_btn
+        except:
+            # print("detail_click_suc ImageView")
+            pass
 
-    try:
-        share_btn=WebDriverWait(driver, 5).until(EC.presence_of_element_located((AppiumBy.ID, "com.xingin.xhs:id/moreOperateIV")))
-        return True,share_btn
-    except:
-        print("detail_click_suc moreOperateIV")
-        pass
-    # 用是否出现评论来判断详情页，是否点击成功
-    try:
-        share_btn=WebDriverWait(driver, 3).until(EC.presence_of_element_located( (AppiumBy.XPATH, ".//*[@content-desc='分享']")))
-        return True, share_btn
-    except:
-       print("detail_click_suc content-desc")
-       pass
+        try:
+            share_btn=WebDriverWait(driver, timout).until(EC.presence_of_element_located((AppiumBy.ID, "com.xingin.xhs:id/moreOperateIV")))
+            return True,share_btn
+        except:
+            # print("detail_click_suc moreOperateIV")
+            pass
+        # 用是否出现评论来判断详情页，是否点击成功
+        try:
+            share_btn=WebDriverWait(driver, timout).until(EC.presence_of_element_located( (AppiumBy.XPATH, ".//*[@content-desc='分享']")))
+            return True, share_btn
+        except:
+           # print("detail_click_suc content-desc")
+           pass
 
 
 
