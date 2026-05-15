@@ -57,6 +57,8 @@ def collect_note_cards(driver,target_count: int,max_swipe_count=10):
             favorites_num=detailNote.get("favorites_num")
             share_link=detailNote.get("share_link")
             date=detailNote.get("date")
+            location = detailNote.get("location")
+            distance = detailNote.get("distance")
             #退出详情页
             driver.back()
             if not note_id or len(note_id)<5:
@@ -70,6 +72,8 @@ def collect_note_cards(driver,target_count: int,max_swipe_count=10):
                 "like_num": likes,
                 "comment_num": comment_num,
                 "favorites_num": favorites_num,
+                "location": location,
+                "distance": distance,
                 "note_type": note_type,
                 "share_link": share_link
             }
@@ -91,8 +95,14 @@ def run(args):
     result = {}
     notes=[]
     try:
-        notes = collect_note_cards(driver, args.limit,35)
-        result["notes"] = notes
+        found_tab = find_index_tab(driver, "发现")
+        if found_tab:
+            tab_text = found_tab.get_attribute("content-desc")
+            found_tab.click()
+            # 确认local页面找到
+            if is_on_local(driver, tab_text):
+                notes = collect_note_cards(driver, args.limit,35)
+                result["notes"] = notes
     except Exception as e:
         print(f"({e})")
     print(json.dumps(result, ensure_ascii=False, indent=2))

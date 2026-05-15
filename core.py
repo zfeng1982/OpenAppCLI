@@ -417,3 +417,8 @@ def save_page_src(file_name):
 
     except Exception as e:
         print(f"发生未知错误: {e}")
+
+def  get_url():
+    driver = get_driver()
+    str=driver.current_url
+    print(f"current_url:{str}")

@@ -101,7 +101,6 @@ def get_detail_info(driver,share_btn,is_all=False):
     location=""
     distance=""
     try:
-
         note_type=get_note_type(driver)
             # 2. 获取评论数（content-desc 以 '评论' 开头的 Button）
         try:
@@ -295,7 +294,7 @@ def detail_click_suc(driver):
     return False,None
 
 def get_progress(target_count,completed_count):
-    # print("\033[F\033[K", end="")
+    print("\033[F\033[K", end="")
     print( f"共需要获取{target_count}篇笔记,目前进度{round(completed_count/ target_count * 100)}% ({completed_count}篇)...")
 
 def find_index_tab(driver,tab_text:str):
@@ -320,3 +319,19 @@ def find_index_tab(driver,tab_text:str):
                 break
 
     return found_tab
+
+def is_on_local(driver,local):
+    """
+    判断当前是否在选中tab
+    返回 True/False
+    """
+    try:
+        # 方法1：检查“深圳”Tab是否被选中（最直接）
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((AppiumBy.XPATH,
+                f"//androidx.appcompat.app.ActionBar.Tab[@content-desc='{local}' and @selected='true']"))
+        )
+        return True
+    except:
+        print(f"没用选中:{local}")
+        pass

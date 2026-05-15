@@ -8,6 +8,8 @@ adb shell screencap -p /sdcard/screen.png
 
 from PIL import Image
 
+ucdevtools 定位webview元素
+
 # 环境配置
 1. Python 环境：推荐安装 Python 3.8+ 版本
 2. 推荐安装 JDK 8或 JDK 11/17 等 LTS 长期支持版
@@ -36,10 +38,20 @@ from PIL import Image
 7. 通过 adb devices 获取deviceName
 8. pyyaml,request,PIL(pillow)
 # 模型器
-推荐选择（兼顾稳定性和主流）
-建议选择列表中的 Pixel 9​ 或 Pixel 9 Pro（这两个是列表中最新的主流机型）。  
+## 推荐选择（兼顾稳定性和主流）
+建议选择列表中的 Pixel 9或 Pixel 9 Pro（这两个是列表中最新的主流机型）。  
 理由：新机型的屏幕分辨率和系统底层特性更符合目前市面上的主流 App，很多 Appium 的官方示例代码也是基于这类机型写的。  
  Android Emulator hypervisor driver is not installed.  
  这个警告如果不处理，你就算选好了手机，点击下一步并在最后启动模拟器时，也会非常卡顿甚至直接报错！  
  解决方法： 请直接点击这条红字右边的蓝色链接 Install AEHD，按照提示让 Android Studio 自动帮你安装好虚拟化驱动。装好之后，再点击下一步创建模拟器，Appium 自动化跑起来才会丝滑  
+
+## AEHD
+WSL2 和 Android 模拟器的虚拟化驱动（AEHD）不能共存，WSL2 会独占虚拟化资源，导致 AEHD 安装失败。
+
+C:\Users\pan>wsl --set-default-version 1
+操作成功完成。
+很好！命令执行成功了，WSL 已经降级到 WSL1，不再和 Android 模拟器抢虚拟化资源了。
+最可能的原因是 WSL2 (Windows Subsystem for Linux)​ 的干扰。
+
+WSL2 是 Windows 的一种轻量级 Linux 子系统，它的底层也使用了虚拟化技术。当你在命令行输入 wsl能直接进入 Linux 环境（如截图所示），说明你的电脑很可能已经安装并启用了 WSL2。  
 

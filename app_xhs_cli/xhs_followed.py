@@ -92,7 +92,8 @@ def collect_note_cards(driver,target_count: int,max_swipe_count=10):
                         continue
 
                     collected.append(note)
-                    print(f"已获取{len(collected)}篇,共需要获取{target_count}篇笔记")
+                    get_progress(target_count, len(collected))
+
                     # 放够了直接返回吧
                     if len(collected) >= target_count:
                         return collected
@@ -117,11 +118,17 @@ def run(args):
     result = {}
     notes=[]
     try:
-        follow_tab = driver.find_element(AppiumBy.XPATH, "//androidx.appcompat.app.ActionBar.Tab[@content-desc='关注']")
-        follow_tab.click()
-        time.sleep(3)
-        notes = collect_note_cards(driver, args.limit,50)
-        result["notes"] = notes
+        # follow_tab = driver.find_element(AppiumBy.XPATH, "//androidx.appcompat.app.ActionBar.Tab[@content-desc='关注']")
+        follow_tab =  find_index_tab(driver, "关注")
+        if follow_tab:
+            follow_tab.click()
+            #不要太快了,可能会被平台检测出来是自动化程序
+            time.sleep(3)
+            # 不作判断点击后会变化
+            #  tab_text = follow_tab.get_attribute("content-desc")
+            # if is_on_local(driver, tab_text):
+            notes = collect_note_cards(driver, args.limit,50)
+            result["notes"] = notes
     except Exception as e:
         print(f"({e})")
     print(json.dumps(result, ensure_ascii=False, indent=2))

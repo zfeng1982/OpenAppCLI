@@ -147,21 +147,7 @@ def collect_note_cards(driver,local,target_count: int,max_swipe_count=10):
         time.sleep(1)
         swipe_count=swipe_count+1
     return collected
-def is_on_local(driver,local):
-    """
-    判断当前是否在深圳页面
-    返回 True/False
-    """
-    try:
-        # 方法1：检查“深圳”Tab是否被选中（最直接）
-        WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((AppiumBy.XPATH,
-                f"//androidx.appcompat.app.ActionBar.Tab[@content-desc='{local}' and @selected='true']"))
-        )
-        return True
-    except:
-        print(f"没用选中:{local}")
-        pass
+
 
 
 
