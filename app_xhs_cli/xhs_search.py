@@ -152,15 +152,16 @@ def run(args):
             # print("✓ 已切换到“用户”标签页")
             time.sleep(1)  # 等待用户列表加载
             # 点击第一个用户条目
-            # first_user = WebDriverWait(driver, 10).until(
-            #     EC.element_to_be_clickable((AppiumBy.XPATH, "//android.view.ViewGroup[contains(@content-desc, '粉丝')][1]"))
-            # )
-            first_user=driver.find_elements(AppiumBy.XPATH, "//android.view.ViewGroup[contains(@content-desc, '粉丝')][1]")
+            first_user = wait.until(
+                EC.presence_of_all_elements_located((AppiumBy.XPATH, "//android.view.ViewGroup[contains(@content-desc, '粉丝')][1]"))
+            )
+            # first_user=driver.find_elements(AppiumBy.XPATH, "//android.view.ViewGroup[contains(@content-desc, '粉丝')][1]")
             # 有搜索结果
             if first_user:
                 first_user[0].click()
-                time.sleep(2)  # 等待用户列表加载
-                textView = driver.find_elements(AppiumBy.XPATH,"//android.widget.TextView")
+                print(1)
+                textView = wait.until(EC.presence_of_all_elements_located((AppiumBy.XPATH, "//android.widget.TextView")))
+                print(2)
                 # 用户名
                 use_name=textView[0].text.strip()
                 # # 职业
@@ -170,17 +171,18 @@ def run(args):
                 # 小红书号
                 xhs_id_elem = driver.find_element(AppiumBy.XPATH, "//android.widget.TextView[contains(@text, '小红书号：')]")
                 xhs_id = xhs_id_elem.text.split('：')[-1].strip()
+                print(3)
                 # IP属地
                 ip_elem = driver.find_element(AppiumBy.XPATH, "//android.widget.TextView[contains(@text, 'IP属地：')]")
                 ip_location = ip_elem.text.split('：')[-1].strip()
-
+                print(4)
                 follow_btn = driver.find_element(AppiumBy.XPATH,"//android.widget.Button[.//android.widget.TextView[@text='关注']]")
                 follow_count = follow_btn.find_element(AppiumBy.XPATH, ".//android.widget.TextView[1]").text
-
+                print(5)
                 # 粉丝数（取按钮内第一个 TextView 的数字文本）
                 fans_btn = driver.find_element(AppiumBy.XPATH, "//android.widget.Button[contains(@content-desc, '粉丝')]")
                 fans_count = fans_btn.find_element(AppiumBy.XPATH, ".//android.widget.TextView[1]").text
-
+                print(6)
                 # 获赞与收藏（取按钮内第一个 TextView 的数字文本）
                 likes_btn = driver.find_element(AppiumBy.XPATH,
                                                 "//android.widget.Button[contains(@content-desc, '获赞与收藏')]")

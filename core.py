@@ -411,10 +411,6 @@ def save_page_src(file_name):
         with open(file_name, "w", encoding="utf-8") as f:
             f.write(page_source)
         print(f"保存Page Source成功!({file_name})")
-
-        # timestamp = time.strftime("%Y%m%d_%H%M%S")
-        # driver.save_screenshot(os.path.join(".", f"page_source_{timestamp}.png"))
-
     except Exception as e:
         print(f"发生未知错误: {e}")
 
