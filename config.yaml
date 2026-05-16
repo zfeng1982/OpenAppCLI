@@ -28,3 +28,6 @@ apps:
     appPackage: com.ss.android.ugc.aweme
     appActivity: com.ss.android.ugc.aweme.splash.SplashActivity
     description: 抖音
+
+#系统输入法
+IME: com.baidu.input_huawei/.ImeService

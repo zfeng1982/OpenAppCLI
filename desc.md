@@ -1,5 +1,11 @@
 获取当前应用的 appPackage（应用包名）和 appActivity（当前界面的名称）:adb shell dumpsys window | findstr mCurrentFocus
 
+输入法切换
+PS C:\Users\pan> adb shell ime list -s
+io.appium.settings/.UnicodeIME
+com.baidu.input_huawei/.ImeService
+io.appium.settings/.AppiumIME
+
 # 启动appium参数
 启动参数	命令示例	效果说明
 只开启 ADB 功能 (安全，推荐)	appium --allow-insecure=uiautomator2:adb_shell
@@ -9,6 +15,8 @@ adb shell screencap -p /sdcard/screen.png
 from PIL import Image
 
 ucdevtools 定位webview元素
+
+
 
 # 环境配置
 1. Python 环境：推荐安装 Python 3.8+ 版本

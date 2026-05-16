@@ -141,7 +141,10 @@ def get_driver(app_package: Optional[str] = None, app_activity: Optional[str] = 
         if not device_config:
             print("配置文件中缺少 device 信息")
             exit(1)
-
+        ime_id = config.get("IME", None)
+        if not ime_id:
+            print("配置文件中缺少 IME 信息")
+            exit(1)
         # 创建 AppiumOptions 对象
         options = AppiumOptions()
 
