@@ -1,22 +1,14 @@
-获取当前应用的 appPackage（应用包名）和 appActivity（当前界面的名称）:adb shell dumpsys window | findstr mCurrentFocus
 
-输入法切换
-PS C:\Users\pan> adb shell ime list -s
-io.appium.settings/.UnicodeIME
-com.baidu.input_huawei/.ImeService
-io.appium.settings/.AppiumIME
 
 # 启动appium参数
-启动参数	命令示例	效果说明
-只开启 ADB 功能 (安全，推荐)	appium --allow-insecure=uiautomator2:adb_shell
-开启所有不安全的权限 (全开)	appium --relaxed-security	放开所有 Appium 定义的高风险功能，权限完全开放。
-adb shell screencap -p /sdcard/screen.png
+1. 只开启 ADB 功能 (安全，推荐):appium --allow-insecure=uiautomator2:adb_shell
+2. 开启所有不安全的权限 (全开):appium --relaxed-security(放开所有 Appium 定义的高风险功能，权限完全开放。)
+3. adb shell screencap -p /sdcard/screen.png
+4. 获取deviceName:adb devices
 
-from PIL import Image
-
-ucdevtools 定位webview元素
-
-
+# adb命令
+1. 获取当前应用的 appPackage（应用包名）和 appActivity（当前界面的名称）:adb shell dumpsys window | findstr mCurrentFocus
+2. 获取手机输入法列表:adb shell ime list -s
 
 # 环境配置
 1. Python 环境：推荐安装 Python 3.8+ 版本
@@ -24,7 +16,9 @@ ucdevtools 定位webview元素
 3. Android SDK (或 Command-line Tools)
    - 作用: 提供 adb(Android Debug Bridge) 工具，用于电脑与模拟器/真机通信，还提供元素定位工具 uiautomatorviewer 
    - 轻量级：直接下载 Android SDK Command-line Tools。
+     - [command-line-tools-only下载](https://developer.android.google.cn/studio?hl=zh-cn#command-line-tools-only)
    - 完整版：下载并安装 Android Studio，然后在设置中下载对应的 SDK 包
+     - [Android Studio下载](https://developer.android.google.cn/studio?hl=zh-cn)
    - 环境变量：
      - 新建系统变量 ANDROID_HOME，值为 SDK 安装路径（例如 C:\Users\YourName\AppData\Local\Android\Sdk）。
      - 在系统变量 Path中添加 %ANDROID_HOME%\platform-tools和 %ANDROID_HOME%\tools
@@ -42,24 +36,11 @@ ucdevtools 定位webview元素
    - 进入“开发者选项”，打开 “USB调试”
    - 关闭"监控ADB安装应用"
    - 关闭"通过USB验证应用"
-   
-7. 通过 adb devices 获取deviceName
-8. pyyaml,request,PIL(pillow)
-# 模型器
-## 推荐选择（兼顾稳定性和主流）
-建议选择列表中的 Pixel 9或 Pixel 9 Pro（这两个是列表中最新的主流机型）。  
-理由：新机型的屏幕分辨率和系统底层特性更符合目前市面上的主流 App，很多 Appium 的官方示例代码也是基于这类机型写的。  
- Android Emulator hypervisor driver is not installed.  
- 这个警告如果不处理，你就算选好了手机，点击下一步并在最后启动模拟器时，也会非常卡顿甚至直接报错！  
- 解决方法： 请直接点击这条红字右边的蓝色链接 Install AEHD，按照提示让 Android Studio 自动帮你安装好虚拟化驱动。装好之后，再点击下一步创建模拟器，Appium 自动化跑起来才会丝滑  
 
-## AEHD
-WSL2 和 Android 模拟器的虚拟化驱动（AEHD）不能共存，WSL2 会独占虚拟化资源，导致 AEHD 安装失败。
+7. pyyaml,request,PIL(pillow)
+8. ucdevtools 定位webview元素
 
-C:\Users\pan>wsl --set-default-version 1
-操作成功完成。
-很好！命令执行成功了，WSL 已经降级到 WSL1，不再和 Android 模拟器抢虚拟化资源了。
-最可能的原因是 WSL2 (Windows Subsystem for Linux)​ 的干扰。
 
-WSL2 是 Windows 的一种轻量级 Linux 子系统，它的底层也使用了虚拟化技术。当你在命令行输入 wsl能直接进入 Linux 环境（如截图所示），说明你的电脑很可能已经安装并启用了 WSL2。  
+
+
 
