@@ -5,6 +5,9 @@ import time
 from core import *
 import requests
 
+from util import element_on_clickable
+
+
 def extract_one_url(text: str) -> str:
     match = re.search(r'https?://\S+', text)
     return match.group(0) if match else ""
@@ -101,6 +104,7 @@ def get_detail_info(driver,share_btn,is_all=False):
     date=""
     location=""
     distance=""
+    content = ""
     try:
         note_type=get_note_type(driver)
             # 2. 获取评论数（content-desc 以 '评论' 开头的 Button）
@@ -132,29 +136,6 @@ def get_detail_info(driver,share_btn,is_all=False):
             if comment_num == "" and favorites_num == "":
                 favorites_num = interaction_metrics[1]
                 comment_num=interaction_metrics[2]
-
-        # like_num_fail =False
-        # try:
-        #     like_layout = driver.find_element(AppiumBy.XPATH,
-        #                                       "//android.widget.Button[starts-with(@content-desc, '收藏')]/preceding-sibling::android.widget.LinearLayout[1]")
-        #     # 在该布局内查找 TextView（显示数字）
-        #     like_text_elem = like_layout.find_element(AppiumBy.XPATH, ".//android.widget.TextView")
-        #     like_num = like_text_elem.text.strip()
-        # except Exception as e:
-        #     like_num_fail=True
-        #
-        # try:
-        #     if like_num_fail:
-        #         # like_btn = driver.find_element(AppiumBy.XPATH,"//android.widget.Button[starts-with(@content-desc, '点赞')]")
-        #         like_btn = driver.find_element(AppiumBy.XPATH,"//android.widget.Button[contains(@content-desc, '点赞')]")
-        #         like_num = like_btn.get_attribute("content-desc").replace('已点赞',"").replace('点赞',"").replace(' ',"")
-        # except Exception as e:
-        #     print(f"获取点赞数失败: {e}")
-        # 先用分享文本找,找不到用moreOperateIV
-        # try:
-        #     share_btn = driver.find_element(AppiumBy.XPATH, ".//*[@content-desc='分享']")
-        # except:
-        #     share_btn = driver.find_element(AppiumBy.ID, "com.xingin.xhs:id/moreOperateIV")
 
         if share_btn:
             share_btn.click()
@@ -198,6 +179,10 @@ def get_detail_info(driver,share_btn,is_all=False):
                             # 评论内容太多往下拉下
                             for i in range(20):
                                 views = driver.find_elements(AppiumBy.XPATH, "//android.view.View")
+                                if content == "":
+                                    titlecontent,content = get_details_video_text(driver)
+                                    if titlecontent != "":
+                                        title = titlecontent
                                 for view in views:
                                     # 优先检查 content-desc
                                     content_desc = view.get_attribute("content-desc")
@@ -221,6 +206,10 @@ def get_detail_info(driver,share_btn,is_all=False):
                     scroll_small_step(driver, 0.2)
                     time.sleep(0.1)
                     views = driver.find_elements(AppiumBy.XPATH, "//android.view.View")
+                    if content=="":
+                        titlecontent,content=get_details_narmal_text(driver)
+                        if titlecontent !="":
+                            title=titlecontent
                     for view in views:
                         # 优先检查 content-desc
                         content_desc = view.get_attribute("content-desc")
@@ -240,6 +229,7 @@ def get_detail_info(driver,share_btn,is_all=False):
 
     return {
             "title": title,
+            "content": content,
             "note_id": note_id,
             "author": "",
             "date": date,
@@ -299,7 +289,7 @@ def detail_click_suc(driver):
     return False,None
 
 def get_progress(target_count,completed_count):
-    print("\033[F\033[K", end="")
+    # print("\033[F\033[K", end="")
     print( f"共需要获取{target_count}篇笔记,目前进度{round(completed_count/ target_count * 100)}% ({completed_count}篇)...")
 
 def find_index_tab(driver,tab_text:str):
@@ -371,7 +361,7 @@ def get_user_index(driver):
             share_link=""
             xhs_id=""
             try:
-                children = container.find_elements(AppiumBy.XPATH, "//*")
+                # children = container.find_elements(AppiumBy.XPATH, "//*")
                 # print(f"children:{len(children)}")
                 # if len(children) == 6 and children[2].text.strip() == '地点':
                 # print("找到用户首页LinearLayout")
@@ -513,3 +503,82 @@ def get_user_note_list(driver,author,target_count: int,max_swipe_count=10):
         time.sleep(1)
         swipe_count = swipe_count + 1
     return collected
+
+def get_details_narmal_text(driver):
+    title=""
+    content=""
+    try:
+        container = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((
+                AppiumBy.XPATH,
+                "//android.widget.LinearLayout[count(child::*) >= 2 and child::*[1][self::android.widget.TextView] and child::*[2][self::android.widget.TextView] ]"
+            ))
+        )
+        if container:
+            title =    container.find_element(AppiumBy.XPATH, "//android.widget.TextView[1]").text
+            content =  container.find_element(AppiumBy.XPATH, "//android.widget.TextView[2]").text
+    except Exception as e:
+        print(f"get_details_narmal_text except: {e}")
+        pass
+    return title,content
+
+def get_details_video_text(driver):
+    content=""
+    title=""
+    try:
+        container = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((
+                AppiumBy.XPATH,
+                "//android.widget.LinearLayout[count(child::*) = 1 and child::*[1][self::android.widget.TextView] ]"
+            ))
+        )
+        if container:
+            # 视频评论里用换行来分离标题和换行(去掉开头的换行)
+            content =  container.find_element(AppiumBy.XPATH, "//android.widget.TextView[1]").text
+            # if content.startswith("\n"):
+            #     content = content[1:]
+            title, _, content = content.partition('\n')
+    except Exception as e:
+        print(f"get_details_video_text except: {e}")
+        pass
+    return title,content
+
+def back_index(driver, max_attempts=10):
+    """
+    通过多次返回操作回到首页，直到页面同时包含所有指定的文本元素。
+
+    :param driver: Appium driver 实例
+    :param xpath_texts: 需要同时存在的文本列表，例如 ['首页', '推荐']
+    :param max_attempts: 最大尝试次数（返回操作的次数）
+    """
+    # 如果 driver 无效，尝试重连
+    if not driver or not driver.session_id:
+        driver.quit()
+        driver = get_driver()
+        if not driver:
+            print("无法创建 driver 会话")
+            return
+
+    for attempt in range(max_attempts):
+        # 每次循环开始时检查会话有效性
+        try:
+            _ = driver.current_activity  # 轻量级操作，验证会话
+        except WebDriverException:
+            print("会话失效，尝试重新连接...")
+            driver.quit()
+            driver = get_driver()
+            if not driver:
+                print("重连失败，退出 back_index")
+                return
+            continue
+
+        if element_on_clickable(1,  (AppiumBy.ACCESSIBILITY_ID,"首页"), 0, False):
+            return
+        # 否则执行返回操作，并等待页面刷新
+        try:
+            driver.back()
+            time.sleep(0.5)
+        except WebDriverException as e:
+            print(f"返回操作失败: {e}")
+
+    print(f"⚠️ 尝试 {max_attempts} 次后仍未回到首页，请手动检查")

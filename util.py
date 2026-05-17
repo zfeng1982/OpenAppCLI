@@ -27,9 +27,9 @@ def element_clickable(timeout,locator: tuple[str, str],is_exit=True):
     try:
        ele =WebDriverWait(get_driver(), timeout).until(EC.element_to_be_clickable((locator[0], locator[1])))
     except Exception as e:
-        method_name = inspect.currentframe().f_back.f_code.co_name
-        print(f"等待超时,timeout:{timeout},exit:{is_exit},mark:{method_name},path:{locator[1]}")
         if ele is None and is_exit:
+            method_name = inspect.currentframe().f_back.f_code.co_name
+            print(f"等待超时,timeout:{timeout},exit:{is_exit},mark:{method_name},path:{locator[1]}")
             sys.exit(1)
     return ele
 
@@ -46,8 +46,8 @@ def element_on_clickable(timeout,locator: tuple[str, str],sleep_time=0,is_exit=T
        if sleep_time>0:
            time.sleep(sleep_time)
     except Exception as e:
-        method_name = inspect.currentframe().f_back.f_code.co_name
-        print(f"等待超时,timeout:{timeout},exit:{is_exit},mark:{method_name},path:{locator[1]}")
         if ele is None and is_exit:
+            method_name = inspect.currentframe().f_back.f_code.co_name
+            print(f"等待超时,timeout:{timeout},exit:{is_exit},mark:{method_name},path:{locator[1]}")
             sys.exit(1)
     return ele

@@ -302,62 +302,7 @@ def scroll_down_screens(driver, screens=1, swipe_duration=300):
         time.sleep(2)  # 等待内容加载
 
 
-def back_index(driver, xpath_texts: list, max_attempts=10):
-    """
-    通过多次返回操作回到首页，直到页面同时包含所有指定的文本元素。
 
-    :param driver: Appium driver 实例
-    :param xpath_texts: 需要同时存在的文本列表，例如 ['首页', '推荐']
-    :param max_attempts: 最大尝试次数（返回操作的次数）
-    """
-    # 如果 driver 无效，尝试重连
-    if not driver or not driver.session_id:
-        driver.quit()
-        driver = get_driver()
-        if not driver:
-            print("无法创建 driver 会话")
-            return
-
-    for attempt in range(max_attempts):
-        # 每次循环开始时检查会话有效性
-        try:
-            _ = driver.current_activity  # 轻量级操作，验证会话
-        except WebDriverException:
-            print("会话失效，尝试重新连接...")
-            driver.quit()
-            driver = get_driver()
-            if not driver:
-                print("重连失败，退出 back_index")
-                return
-            continue
-
-        # 检查所有指定的文本是否同时存在
-        all_found = True
-        try:
-            for text in xpath_texts:
-                elements = driver.find_elements(
-                    AppiumBy.XPATH, f"//android.widget.TextView[@text='{text}']"
-                )
-                if not elements:
-                    all_found = False
-                    break
-        except WebDriverException as e:
-            # 查找元素时发生连接异常，认为会话可能失效，下次循环会重连
-            print(f"查找首页标签时连接异常: {e}，将在下一次循环重试")
-            continue
-
-        # 如果所有文本都存在，则认为已回到首页，直接返回
-        if all_found:
-            return
-
-        # 否则执行返回操作，并等待页面刷新
-        try:
-            driver.back()
-            time.sleep(0.5)
-        except WebDriverException as e:
-            print(f"返回操作失败: {e}")
-
-    print(f"⚠️ 尝试 {max_attempts} 次后仍未回到首页，请手动检查")
 
 def click_expand_by_coordinate(driver, text, offset_pixels=10):
     """

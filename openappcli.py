@@ -6,6 +6,8 @@ import argparse
 import sys
 from pathlib import Path
 
+from app_xhs_cli.xhs_common import back_index
+
 sys.path.insert(0, str(Path(__file__).parent))
 from sys_cli import list_cli
 from sys_cli import connected_device
@@ -103,6 +105,7 @@ def main():
         elif args.cli == "check-status":
             driver = get_driver()
             check_status.run(driver, args)
+        # python openappcli.py push-file "C:\Users\Administrator\Videos\Cities Skylines\1.png"
         elif args.cli == "push-file":
             driver = get_driver()
             push_file.run(driver, args)
@@ -118,7 +121,7 @@ def main():
             app_caps = apps["xhs"]
             driver = get_driver(app_caps['appPackage'], app_caps['appActivity'])
             # 回到首页再执行
-            back_index(driver, ['首页', '发现', '我'])
+            back_index(driver)
             if args.cli == "xhs-publish":
                 xhs_publish.run(args)
             # python openappcli.py xhs-search user --keyword "辛芷蕾" --note --limit 50

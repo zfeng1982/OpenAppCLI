@@ -1,7 +1,7 @@
 import sys
 import os
 import base64
-
+# python openappcli.py push-file "C:\Users\Administrator\Videos\Cities Skylines\1.png"
 def run(driver,args):
     try:
         filepath = args.filepath
