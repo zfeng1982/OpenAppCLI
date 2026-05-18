@@ -64,7 +64,7 @@ def collect_note_cards(driver,target_count: int,max_swipe_count=10):
                     dsc, share_btn = detail_click_suc(driver)
                     if not dsc:
                         print(f"详情页不可获取 ded:{ded}")
-                        break
+                        sys.exit(1)
                     # 得到详情页
                     detailNote = get_detail_info(driver,share_btn)
                     time.sleep(1)

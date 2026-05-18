@@ -5,7 +5,7 @@ import time
 from core import *
 import requests
 
-from util import element_on_clickable
+from util import element_on_clickable, element_clickable, element_located
 
 
 def extract_one_url(text: str) -> str:
@@ -180,6 +180,7 @@ def get_detail_info(driver,share_btn,is_all=False):
                             for i in range(20):
                                 views = driver.find_elements(AppiumBy.XPATH, "//android.view.View")
                                 if content == "":
+                                    print(f"title:{title}")
                                     titlecontent,content = get_details_video_text(driver)
                                     if titlecontent != "":
                                         title = titlecontent
@@ -207,6 +208,7 @@ def get_detail_info(driver,share_btn,is_all=False):
                     time.sleep(0.1)
                     views = driver.find_elements(AppiumBy.XPATH, "//android.view.View")
                     if content=="":
+                        # print(f"title:{title}")
                         titlecontent,content=get_details_narmal_text(driver)
                         if titlecontent !="":
                             title=titlecontent
@@ -243,50 +245,17 @@ def get_detail_info(driver,share_btn,is_all=False):
             }
 
 def detail_click_suc(driver):
-    #短时间快速的找到,没找到再来一次
-    for i in range(1, 4):
-        timout=1*i
-        try:
-            share_btn = WebDriverWait(driver, timout).until(
-                EC.presence_of_element_located((AppiumBy.XPATH, "//android.widget.ImageView[@content-desc='分享']")))
-            return True, share_btn
-        except:
-            # print("detail_click_suc ImageView")
-            pass
-
-        try:
-            share_btn=WebDriverWait(driver, timout).until(EC.presence_of_element_located((AppiumBy.ID, "com.xingin.xhs:id/moreOperateIV")))
-            return True,share_btn
-        except:
-            # print("detail_click_suc moreOperateIV")
-            pass
-        # 用是否出现评论来判断详情页，是否点击成功
-        try:
-            share_btn=WebDriverWait(driver, timout).until(EC.presence_of_element_located( (AppiumBy.XPATH, ".//*[@content-desc='分享']")))
-            return True, share_btn
-        except:
-           # print("detail_click_suc content-desc")
-           pass
-
-
-
-    # # 用是否出现评论来判断详情页，是否点击成功
-    # try:
-    #     WebDriverWait(driver, 10).until(EC.presence_of_element_located(
-    #         (AppiumBy.XPATH, "//android.widget.Button[starts-with(@content-desc, '评论')]")))
-    #     return True
-    # except:
-    #     pass
-    #
-    #     # 不可评论的详情页
-    # try:
-    #     WebDriverWait(driver, 10).until(EC.presence_of_element_located(
-    #         (AppiumBy.XPATH, "//android.widget.TextView[contains(@text, '评论')]")))
-    #     return True
-    # except:
-    #     pass
-
-    return False,None
+    wait = WebDriverWait(driver, 10)   # 总超时秒
+    try:
+        element = wait.until(
+            EC.any_of(
+                EC.element_to_be_clickable((AppiumBy.ACCESSIBILITY_ID, "分享")),
+                EC.element_to_be_clickable((AppiumBy.ID, "com.xingin.xhs:id/moreOperateIV"))
+            )
+        )
+        return True, element
+    except:
+        return False, None
 
 def get_progress(target_count,completed_count):
     # print("\033[F\033[K", end="")
@@ -505,42 +474,37 @@ def get_user_note_list(driver,author,target_count: int,max_swipe_count=10):
     return collected
 
 def get_details_narmal_text(driver):
-    title=""
-    content=""
-    try:
-        container = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((
-                AppiumBy.XPATH,
-                "//android.widget.LinearLayout[count(child::*) >= 2 and child::*[1][self::android.widget.TextView] and child::*[2][self::android.widget.TextView] ]"
-            ))
-        )
-        if container:
-            title =    container.find_element(AppiumBy.XPATH, "//android.widget.TextView[1]").text
-            content =  container.find_element(AppiumBy.XPATH, "//android.widget.TextView[2]").text
-    except Exception as e:
-        print(f"get_details_narmal_text except: {e}")
-        pass
-    return title,content
+   title=""
+   content=""
+
+   titleAndContent= element_located(10, (
+       AppiumBy.XPATH,"//android.widget.LinearLayout[count(child::*) = 2 and child::*[1][self::android.widget.TextView] and child::*[2][self::android.widget.TextView] ]"
+   ), False)
+   if titleAndContent:
+        title = titleAndContent.find_element(AppiumBy.XPATH, "//android.widget.TextView[1]").text
+        content = titleAndContent.find_element(AppiumBy.XPATH, "//android.widget.TextView[2]").text
+   else:
+       content_ele = element_located(10, (AppiumBy.XPATH,"//android.widget.LinearLayout[count(child::*) = 1 and child::*[1][self::android.widget.TextView] ]"),False)
+       if content_ele:
+            content = content_ele.find_element(AppiumBy.XPATH, "//android.widget.TextView[1]").text
+   #只有内容没有title
+   print(f"narmal title:{title[:5]} content:{content[:10]}")
+   return title,content
 
 def get_details_video_text(driver):
     content=""
     title=""
-    try:
-        container = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((
-                AppiumBy.XPATH,
-                "//android.widget.LinearLayout[count(child::*) = 1 and child::*[1][self::android.widget.TextView] ]"
-            ))
-        )
-        if container:
-            # 视频评论里用换行来分离标题和换行(去掉开头的换行)
-            content =  container.find_element(AppiumBy.XPATH, "//android.widget.TextView[1]").text
-            # if content.startswith("\n"):
-            #     content = content[1:]
-            title, _, content = content.partition('\n')
-    except Exception as e:
-        print(f"get_details_video_text except: {e}")
-        pass
+
+    container = element_located(10, (AppiumBy.XPATH,
+                         "//android.widget.LinearLayout[count(child::*) = 1 and child::*[1][self::android.widget.TextView and @index=0] ]"),
+                    False)
+    if container:
+        # 视频评论里用换行来分离标题和换行(去掉开头的换行)
+        content =  container.find_element(AppiumBy.XPATH, "//android.widget.TextView[1]").text
+        # if content.startswith("\n"):
+        #     content = content[1:]
+        title, _, content = content.partition('\n')
+    print(f"video title:{title[:5]} content:{content[:10]}")
     return title,content
 
 def back_index(driver, max_attempts=10):

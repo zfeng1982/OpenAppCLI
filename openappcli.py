@@ -142,6 +142,7 @@ def main():
             # python openappcli.py xhs-details --note_id "6a00593f000000000803f0bb" --note_type video  --dir "c:\xhs"
             # 超长视频
             # python openappcli.py xhs-details --note_id "69ff656d0000000010001c00" --note_type video  --dir "c:\xhs"
+            # python openappcli.py xhs-details --note_id "69f54d4e0000000020038635" --note_type video  --dir "c:\xhs"
             # python openappcli.py xhs-details --note_id "6966e7af000000000b0124e0" --note_type normal  --dir "c:\xhs"
             # python openappcli.py xhs-details --note_id "69f740d50000000037035ce1" --note_type normal  --dir "c:\xhs"
             # python openappcli.py xhs-details --note_id "69c4a99d00000000230100e0" --note_type normal  --dir "c:\xhs"

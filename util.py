@@ -11,9 +11,9 @@ def element_located(timeout,locator: tuple[str, str],is_exit=True):
     try:
         ele = WebDriverWait(get_driver(), timeout).until(EC.presence_of_element_located((locator[0], locator[1])))
     except Exception as e:
-        method_name = inspect.currentframe().f_back.f_code.co_name
-        print(f"等待超时,timeout:{timeout},exit:{is_exit},mark:{method_name},path:{locator[1]}")
         if ele is None and is_exit:
+            method_name = inspect.currentframe().f_back.f_code.co_name
+            print(f"等待超时,timeout:{timeout},exit:{is_exit},mark:{method_name},path:{locator[1]}")
             sys.exit(1)
     return ele
 

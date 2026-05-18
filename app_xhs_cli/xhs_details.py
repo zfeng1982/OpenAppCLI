@@ -196,10 +196,10 @@ def run(args):
                     text_views.append(text)
             note["text_views"] = text_views
             minutes,seconds=get_video_duration(driver)
-            try:
-                share_btn = driver.find_element(AppiumBy.XPATH, ".//*[@content-desc='分享']")
-            except:
-                share_btn = driver.find_element(AppiumBy.ID, "com.xingin.xhs:id/moreOperateIV")
+            # try:
+            share_btn = driver.find_element(AppiumBy.ACCESSIBILITY_ID, "分享")
+            # except:
+            #     share_btn = driver.find_element(AppiumBy.ID, "com.xingin.xhs:id/moreOperateIV")
 
             if share_btn:
                 before_mobile_video_count=count_xhs_mp4_files(driver)
