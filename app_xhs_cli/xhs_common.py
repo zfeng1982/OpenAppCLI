@@ -46,7 +46,11 @@ def get_address(driver,type:str):
     try:
         if type=="video":
             # 定位所有符合条件的 LinearLayout
-            xpath = "//android.widget.LinearLayout[count(child::*) >= 4 and child::*[1][self::android.widget.ImageView] and child::*[2][self::android.widget.TextView] and child::*[3][self::android.view.View] and child::*[4][self::android.widget.TextView]]"
+            xpath = ("//android.widget.LinearLayout[count(child::*) = 4 "
+                     "and child::*[1][self::android.widget.ImageView] "
+                     "and child::*[2][self::android.widget.TextView] "
+                     "and child::*[3][self::android.view.View] "
+                     "and child::*[4][self::android.widget.TextView and ( translate(@text, '0123456789.', '') = 'm' or translate(@text, '0123456789.', '') = 'km'  )]]")
             layouts = driver.find_elements(AppiumBy.XPATH, xpath)
             for layout in layouts:
                 imgs = layout.find_elements(AppiumBy.XPATH, ".//android.widget.ImageView")
@@ -85,7 +89,8 @@ def get_last_three_numbers_appium(driver):
         if len(elements) < 3:
             return None
         last_three = elements[-3:]
-        texts = [el.text for el in last_three]
+
+        texts = ["0" if el.text == "抢首评" else el.text for el in last_three]
         if all(re.match(r'^\d+$', t) for t in texts):
             return texts
     except Exception as e:

@@ -174,33 +174,27 @@ def delete_xhs_video(driver, remote_path):
 
 def run(args):
     driver = get_driver()
+    note={}
     try:
         deep_link_url = f"xhsdiscover://item/{args.note_id}?type={args.note_type}"
         driver.execute_script('mobile: deepLink', { 'url': f'{deep_link_url}',})
         text_views = []
         video_save_path = []
         image_sava_path = []
-        note = {}
         save_resource_dir=args.dir+"\\"+args.note_id
         if not os.path.exists(save_resource_dir):
             os.makedirs(save_resource_dir)
 
+        is_suc,share_btn = detail_click_suc(driver)
+        if not is_suc:
+            print("详情获取失败")
+            return
+
+        note["note_text"]=get_detail_info(driver,share_btn,True)
         # 需要开启 ADB 功能 (安全，推荐)	appium --allow-insecure=uiautomator2:adb_shell
         if args.note_type=="video":
-            time.sleep(1)
-            all_textviews = driver.find_elements(AppiumBy.XPATH, "//android.widget.TextView")
-            # 遍历查找文本为 "关注" 的 TextView
-            for i, tv in enumerate(all_textviews):
-                text = tv.text.strip()
-                if len(text) > 10:
-                    text_views.append(text)
-            note["text_views"] = text_views
-            minutes,seconds=get_video_duration(driver)
-            # try:
-            share_btn = driver.find_element(AppiumBy.ACCESSIBILITY_ID, "分享")
-            # except:
-            #     share_btn = driver.find_element(AppiumBy.ID, "com.xingin.xhs:id/moreOperateIV")
 
+            minutes,seconds=get_video_duration(driver)
             if share_btn:
                 before_mobile_video_count=count_xhs_mp4_files(driver)
                 share_btn.click()
@@ -243,6 +237,7 @@ def run(args):
                     print(f"文件下载失败,确认作者是否充许保存")
 
                 note["video_save_path"]=video_save_path
+                note["images_save_path"] = image_sava_path
 
         else:
 
