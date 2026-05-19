@@ -28,7 +28,7 @@ def main():
     parser = argparse.ArgumentParser(description="openappcli - 通过 Appium 操作手机的命令行工具")
     # 系统命令
     subparsers = parser.add_subparsers(dest="cli", required=True, help="子命令")
-    subparsers.add_parser("list-cli", help="列出所有命令")
+    # subparsers.add_parser("list-cli", help="列出所有命令")
     subparsers.add_parser("connected-device", help="显示已连接的设备，并检查 Appium server 配置")
     subparsers.add_parser("check-status", help="检查整体状态")
 
@@ -65,7 +65,7 @@ def main():
     xhs_search_parser = subparsers.add_parser("xhs-search", help="小红书搜索笔记")
     xhs_search_parser.add_argument("type", choices=["user", "note"], help="搜索类型")
     xhs_search_parser.add_argument("--keyword", help="搜索关键字")
-    xhs_search_parser.add_argument( "--note",action="store_true",default=False,help="是否需要日志列表，默认不需要")
+    xhs_search_parser.add_argument( "--note",action="store_true",default=False,help="是否需要笔记列表，默认不需要")
     xhs_search_parser.add_argument("--order", choices=["com", "new"], default="com", help="排序方式,默认为(只用搜索日志)")
     xhs_search_parser.add_argument("--limit", type=int, default=10, help="返回笔记条数")
 
@@ -115,7 +115,7 @@ def main():
         elif args.cli == "sps":
             save_page_src(args.file_name)
         # python openappcli.py xhs-publish album --count 2  --title "英国法院裁定三星向中兴赔偿" --content "从公开消息看，中兴通讯在德国、UPC和巴西等法院判决获得了支持。从外媒报道看，从2025年年初，德国、UPC、巴西等法院陆续判决，均支持中兴立场和报价。" --topics "新能源|五一假期"
-        # python openappcli.py xhs-publish text --txttype idea --itxt "多国法院支持中兴通讯的诉求" --title "多国法院支持中兴通讯的诉求" --content "更值得注意的是，英国法院自己在审理“Optis VS Apple”案时也曾使用Top-down进行交叉验证。" --topics "人山人海|五一假期"
+        # python openappcli.py xhs-publish text --txttype thinking --itxt "多国法院支持中兴通讯的诉求" --title "多国法院支持中兴通讯的诉求" --content "更值得注意的是，英国法院自己在审理“Optis VS Apple”案时也曾使用Top-down进行交叉验证。" --topics "人山人海|五一假期"
         # python openappcli.py xhs-publish text --txttype longtxt --topics "辛芷蕾|五一假期" --title "辛芷蕾五一节和闺蜜自驾游，骑着10万元的自行车，还撞树手臂流血" --content "五一小长假大家都玩嗨了吧，平时忙到脚不沾地的明星，也终于能抽出时间好好放松了。咱们熟悉的女演员辛芷蕾，这次她这次晒图不小心把自己开的座驾露了出来，蓝色的家用车，市价大概在28万元左右，不算什么夸张的顶级豪车，走的就是实用舒适路线。大块头的车衬得人愈发小巧，辛芷蕾往那儿一站，气质优雅妩媚，谁能猜出来她已经40岁了。估计是常年练瑜伽的缘故，她的身材紧致利落，连一点多余的小肚子都没有，状态好到不像话。这次到了目的地，她先拉素颜的辛芷蕾皮肤状态依旧能打，白皙细腻不说，脸上连个明显的皱纹斑点都找不到，羡煞了一堆天天熬大夜的打工人。平时在娱乐圈轧戏跑活动，连睡个完整的好觉都难，能这么安安静静跟闺蜜坐一下午吹吹风，这种松弛感真的太戳人了"
         elif args.cli.startswith("xhs-"):
             app_caps = apps["xhs"]
@@ -132,14 +132,14 @@ def main():
             # python openappcli.py xhs-search note --keyword "信息蒸馏研究所" --order com --limit 5
             # python openappcli.py xhs-search note --keyword "辛芷蕾" --limit 5
             # python openappcli.py xhs-search note --keyword "普拉提" --limit 50
-            # python openappcli.py xhs-search note --keyword "迷人又危险的特工姐姐登场" --limit 2
-            # python openappcli.py xhs-search note --keyword "蜜桃女孩" --limit 5
+            # python openappcli.py xhs-search note --keyword "迷人又危险的特工姐姐登场" --order new  --limit 2
+            # python openappcli.py xhs-search note --keyword "蜜桃女孩" --order new --limit 5
             # python openappcli.py xhs-search note --keyword "我的运动日常分享 SS潘泥" --limit 5
             elif args.cli == "xhs-search":
                 xhs_search.run(args)
             #
             # 禁止下载视频
-            # python openappcli.py xhs-details --note_id "6a00593f000000000803f0bb" --note_type video  --dir "c:\xhs"
+            # python openappcli.py xhs-details --note_id "6a09983700000000060223e4" --note_type video  --dir "c:\xhs"
             # 超长视频
             # python openappcli.py xhs-details --note_id "69ff656d0000000010001c00" --note_type video  --dir "c:\xhs"
             # python openappcli.py xhs-details --note_id "69f54d4e0000000020038635" --note_type video  --dir "c:\xhs"
@@ -158,7 +158,7 @@ def main():
                     xhs_discover.run(args)
                 elif args.type == "followed":
                     xhs_followed.run(args)
-                # python openappcli.py xhs-index local --limit 5
+                # python openappcli.py xhs-index lbs --limit 5
                 elif args.type == "lbs":
                     xhs_lbs.run(args)
             elif args.cli=="xhs-comment":

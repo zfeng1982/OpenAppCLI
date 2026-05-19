@@ -12,11 +12,12 @@ metadata:
       - "小红书"
       - "自动化"
       - "发布笔记"
+      - "手机"
       - "xhs"
     homepage: "https://github.com/zfeng1982/OpenAppCLI"
 ---
 # 小红书手机APP控制器
-给你的AI Agent操作手机APP的能力
+让你的AI Agent能操作小红书手机APP
   - 支持发布如下内容:
     - 从相册选择(可把相片从电脑同步到手机)
     - 写想法
@@ -33,13 +34,19 @@ metadata:
   - 搜索
     - 搜索博主
     - 搜索笔记
-
+----
+## 技术支持
+> 环境配置有一定的技术门槛,如果你无法完成下面的环境配置或在配置中遇到什么问题,可直接联系我  
+> 如果需要提供更多功能,也可以直接联系我
+> 邮箱:zfengyy@qq.com  
+> QQ:81261686
+----
 ## 环境准备
 1. 准备手机
-   - 出于安装考虑不建议使用自己日常的手机给Agent操作
+   - 出于安装考虑不建议使用自己日常的手机给Agent进行操作
    - 本技能只支持Android系统的手机
    - 建议使用真机进行自动化操作,理论上可以使用模拟器和云手机
-   - 如果使用真机连接电脑,建议使用原厂的USB线,或者质量较好的数据线
+   - 如果使用真机连接电脑,建议使用原厂的USB线,或者质量较好的数据线.(选最粗的一条线)
    
 2. 手机设置
    - 开启“开发者选项”,连续点击“版本号”7次可开启,不同手机可能开启方式不一样,请自行搜索开启
@@ -70,12 +77,11 @@ metadata:
 
 
 ## 环境确认
-1. adb安装确认,如下执行adb devices命令,返回手机设备信息,请记住这个设备ID,yaml配置文件需要.命令执行失败请检查adb是否安装成功,特别是环境变量
+1. adb安装确认,如下执行adb devices命令,返回手机设备信息,请记住这个设备ID,yaml配置文件需要.命令执行失败请检查adb是否安装成功,特别是环境变量  
 ```bash
-
 PS C:\Users\pan> adb devices
 List of devices attached
-[你手机的设备ID]        device
+[你手机的设备ID]        device  
 ```
 2. 获取系统默认输入法,如下执行adb shell ime list -s命令,返回手机上的输入法,请忽略UnicodeIME和AppiumIME,记下你手机上安装的输入法,我的手机是com.baidu.input_huawei/.ImeService,yaml配置文件需要
 ```bash
@@ -92,7 +98,7 @@ io.appium.settings/.AppiumIME
 4. 确认环境是否成功
     执行 python scripts/openappcli.py connected-device 命令,如果成功会返回如下信息:  
     **✓ 设备已成功连接！**
-
+----
 ## 手机系统CLI
 ### 1.检查手机状态(connected-device)
 查看手机是否成功链接
@@ -135,6 +141,7 @@ python openappcli.py sps <文件在本地的完整路径和文件名>
 ```bash
 python openappcli.py sps search.xml
 ```
+----
 ## 小红书APP CLI
 ### 1.发布相册内容(xhs-publish alum)
 发布相册笔记,相片使用push-file命令推送到手机  
@@ -208,7 +215,10 @@ python scripts/openappcli.py xhs-index discover  --limit 5
       "location": "礼拜五咖啡馆",
       "distance": "2.1km",
       "note_type": "normal",
-      "share_link": "http://xhslink.com/o/AE0rRLjU2DG"
+      "share_link": "http://xhslink.com/o/AE0rRLjU2DG",
+      "_field_comments": {
+        "note_type": "只有两个值normal(图文)和video(视频),暂不支持直播"
+      }
     }
 ```
 ### 7.搜索博主(xhs-search user)
@@ -264,17 +274,81 @@ python scripts/openappcli.py xhs-search user --keyword "辛芷蕾"
 }
 
 ```
-### 8.搜索博主(xhs-search note)
+### 8.搜索日记(xhs-search note)
 搜索博主信息,可选择同时返回博主的笔记
 用法:
 ```bash
-python scripts/openappcli.py xhs-search note [--keyword <博主昵称>] [--limit <返回笔记数量>]
+python scripts/openappcli.py xhs-search note [--keyword <搜索笔记关键字>] [--order {com,new}] [--limit <返回笔记数量>]
 ```
 参数:
-- `--keyword`：博主昵称
+- `--keyword`：搜索笔记关键字
+- `--order`：排序方式,com综合排序,new按时间排序,默认为综合排,注意不是所有搜索结果都支持按时间排序
 - `--limit`：选填,返回笔记的数量,请根据自己手机的性能适当填写,不建议超过50条
 示例:
 ```bash
-python openappcli.py xhs-search note --keyword "我拍到了海鸥雨" --order com --limit 5
+python scripts/openappcli.py xhs-search note --keyword "我拍到了海鸥雨" --order com --limit 1
 ```
 输出:
+```json
+{
+  "hot_keyword_desc": "薯薯拍到了漫天飞舞的“海鸥雨”，当它们从海面与蓝天间蜂拥而至，翅膀掠过指尖，每一帧都是自由与浪漫的碰撞。",
+  "notes": [
+    {
+      "title": "进来感受4k全屏海鸥雨的震撼 #海鸥与日落  #海鸥不再眷恋大海  #带你看海鸥  #你啊借那风越海峡  #总有一只海鸥为你停留  #昆明  #我拍到",
+      "note_id": "6989aaf100000000090384d9",
+      "author": "Donhox 📸",
+      "date": "02-23",
+      "like_num": "10万+",
+      "comment_num": " 9179",
+      "favorites_num": " 36315",
+      "note_type": "normal",
+      "share_link": "http://xhslink.com/o/1tfpCg2ZMct"
+    }
+  ],
+  "_field_comments": {
+    "hot_keyword_desc": "热词介绍,当搜索关键字命中热词是才会有值"
+  }
+}
+```
+### 9.获取和下载笔记详情内容(xhs-details)
+根据笔记ID获取详情包括文本,图片和视频.
+用法:
+```bash
+python scripts/openappcli.py xhs-details [--note_id <笔记ID>] [--note_type {normal,video}]  [--dir <保存资源的本地目录>]
+```
+参数:
+- `--note_id`：笔记ID,可从笔记列表中获取
+- `--note_type`：笔记类型,normal(图文)和video(视频)二选一,可从笔记列表中获取
+- `--dir`：下载资源的保存目录,包括图片和视频.技能只能获取手机上保存目录为/sdcard/DCIM/Camera/的资源,一般手机默认都是这个设置
+示例:
+```bash
+python openappcli.py xhs-details --note_id "69f54d4e0000000020038635" --note_type video  --dir "c:\xhs"
+```
+输出:
+```json
+{
+   "note_text": {
+    "title": "和我一起开启「满级XIN状态」",
+    "content": "和 ID. ERA 9X 同行，每一段旅程都自在从容🚗 @大众汽车 @上汽大众大众品牌\n#大众9X #德系满级旗舰SUV #大众汽车全新以赴 ",
+    "note_id": "69ec2741000000003502aae8",
+    "author": "",
+    "date": "04-25",
+    "like_num": "2121",
+    "comment_num": "302",
+    "favorites_num": "133",
+    "location": "",
+    "distance": "",
+    "note_type": "video",
+    "share_link": "http://xhslink.com/o/8k5Aa5sPbyt"
+  },
+  "video_save_path": [
+    "c:\\xhs\\69ec2741000000003502aae8\\video.mp4"
+  ],
+  "images_save_path": [],
+  "_field_comments": {
+    "video_save_path": "note_type=video 时才会有值",
+    "images_save_path": "note_type=normal 时才会有值"
+  }
+}
+
+```
