@@ -164,8 +164,12 @@ def run(args):
                 result["user"] =usr
                 result["notes"]=[]
                 if args.note:
-                    notes = get_user_note_list(driver,usr.get("user_name"), args.limit, 70)
-                    result["notes"]=notes
+                    if  not element_located(1, (AppiumBy.XPATH, "//android.widget.TextView[@text='浏览记录']"), False):
+                        notes = get_user_note_list(driver,usr.get("user_name"), args.limit, 70)
+                        result["notes"] = notes
+                    else:
+                        print("暂不支持查看自己的笔记列表")
+
         # 搜索笔记
         elif args.type == 'note':
             hot_desc=""

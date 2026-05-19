@@ -12,6 +12,22 @@ def goto_mark(note_type):
     if note_type=="video":
         return  element_on_clickable(10, (AppiumBy.XPATH, "//android.widget.TextView[@text='说点什么...']"))
 
+    # 先判断一下是不是自己发的笔记
+    if element_located(1, (AppiumBy.XPATH, "//android.widget.TextView[@text='编辑和权限设置']"), False):
+
+        has_comment=not element_located(1, (AppiumBy.XPATH, "//android.widget.TextView[@text='评论']"),False)
+
+        element_on_clickable(10, (AppiumBy.XPATH, "//android.widget.Button[@index=3]"))
+        # 有评论
+        if has_comment:
+            container = element_located(10, (AppiumBy.XPATH,
+                                             "//android.view.ViewGroup[@index=1 and count(child::*) = 3 and child::*[1][self::android.widget.LinearLayout and @index=0] and  child::*[2][self::android.widget.TextView and @index=1] ]"),
+                                        )
+            if container:
+                container.find_element(AppiumBy.XPATH, "//android.widget.TextView[1]").click()
+
+        return None
+    # 找到评论输入框,并点击
     return element_on_clickable(10, (AppiumBy.ACCESSIBILITY_ID, '评论框'))
 
 
@@ -26,17 +42,7 @@ def run(args):
     try:
         deep_link_url = f"xhsdiscover://item/{args.note_id}?type={args.note_type}"
         driver.execute_script('mobile: deepLink', { 'url': f'{deep_link_url}',})
-        # 先判断一下是不是自己发的笔记
-        if element_located(10, (AppiumBy.XPATH, "//android.widget.TextView[@text='编辑和权限设置']"),False):
-            if element_on_clickable(10, (AppiumBy.XPATH, "//android.widget.Button[@index=3]")):
-                container = element_located(10, (AppiumBy.XPATH,
-                                                 "//android.view.ViewGroup[@index=1 and count(child::*) = 3 and child::*[1][self::android.widget.LinearLayout and @index=0] and  child::*[2][self::android.widget.TextView and @index=1] ]"),
-                                            )
-                if container:
-                   container.find_element(AppiumBy.XPATH, "//android.widget.TextView[1]").click()
-        else:
-            #找到评论输入框,并点击
-            goto_mark(args.note_type)
+        goto_mark(args.note_type)
         #点击弹出的输入框架内
         edit_text=input_mark()
         edit_text.clear()

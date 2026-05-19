@@ -22,19 +22,7 @@ def expand_short_url(short_url: str) -> str:
         return short_url  # 没有跳转
     except Exception as e:
         return f"解析失败: {e}"
-def get_note_type(driver):
-    note_type = "normal"
-    if is_video_note(driver):
-        note_type = "video"
-    return note_type
 
-def is_video_note(driver) -> bool:
-    """返回 True 表示当前页面是视频笔记"""
-    try:
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located((AppiumBy.CLASS_NAME, "com.xingin.redview.seekbar.VideoSeekBar")))
-        return True
-    except:
-        return False
 def get_address(driver,type:str):
     location=""
     distance=""
@@ -106,8 +94,8 @@ def get_detail_info(driver,share_btn,is_all=False):
     distance=""
     content = ""
     try:
-        note_type=get_note_type(driver)
-            # 2. 获取评论数（content-desc 以 '评论' 开头的 Button）
+        note_type = "video" if share_btn.get_attribute("content-desc") == "分享" else "normal"
+        # 2. 获取评论数（content-desc 以 '评论' 开头的 Button）
         try:
             # 使用 find_elements 避免找不到时报错
             comment_btns = driver.find_elements(AppiumBy.XPATH,
@@ -126,7 +114,6 @@ def get_detail_info(driver,share_btn,is_all=False):
 
         except Exception as e:
             print(f"获取收藏数失败")
-
         #用于广告详情页的互动指标
         # print(f"comment_num:{comment_num},favorites_num:{favorites_num}")
 
@@ -136,7 +123,6 @@ def get_detail_info(driver,share_btn,is_all=False):
             if comment_num == "" and favorites_num == "":
                 favorites_num = interaction_metrics[1]
                 comment_num=interaction_metrics[2]
-
         if share_btn:
             share_btn.click()
             # time.sleep(1)
@@ -253,6 +239,7 @@ def detail_click_suc(driver):
                 EC.element_to_be_clickable((AppiumBy.ID, "com.xingin.xhs:id/moreOperateIV"))
             )
         )
+
         return True, element
     except:
         return False, None
@@ -413,7 +400,6 @@ def get_user_note_list(driver,author,target_count: int,max_swipe_count=10):
                 temp_title = elem.get_attribute("content-desc")
             except:
                 break
-
             # 存在就不要放子
             if temp_title in title_ary or temp_title == "" or temp_title is None :
                 continue
@@ -470,6 +456,7 @@ def get_user_note_list(driver,author,target_count: int,max_swipe_count=10):
             break
         # 4. 滚动加载更多
         scroll_small_step(driver, 0.2)
+
         time.sleep(1)
         swipe_count = swipe_count + 1
     return collected
@@ -478,14 +465,14 @@ def get_details_narmal_text(driver):
    title=""
    content=""
 
-   titleAndContent= element_located(10, (
+   titleAndContent= element_located(3, (
        AppiumBy.XPATH,"//android.widget.LinearLayout[count(child::*) = 2 and child::*[1][self::android.widget.TextView] and child::*[2][self::android.widget.TextView] ]"
    ), False)
    if titleAndContent:
         title = titleAndContent.find_element(AppiumBy.XPATH, "//android.widget.TextView[1]").text
         content = titleAndContent.find_element(AppiumBy.XPATH, "//android.widget.TextView[2]").text
    else:
-       content_ele = element_located(10, (AppiumBy.XPATH,"//android.widget.LinearLayout[count(child::*) = 1 and child::*[1][self::android.widget.TextView] ]"),False)
+       content_ele = element_located(3, (AppiumBy.XPATH,"//android.widget.LinearLayout[count(child::*) = 1 and child::*[1][self::android.widget.TextView] ]"),False)
        if content_ele:
             content = content_ele.find_element(AppiumBy.XPATH, "//android.widget.TextView[1]").text
    #只有内容没有title

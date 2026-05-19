@@ -2,7 +2,7 @@
 name: xhs-mobile-app-controller
 displayName: 小红书手机APP控制器
 author: sardinesInQianhai
-description: 让你的Agent可以操作小红书手机APP,包括自动化发布长文，想法，相册，下载相册笔记和视频笔记等
+description: 让你的Agent能操作小红书手机APP,包括自动化发布长文，想法，相册，下载相册笔记和视频笔记等
 metadata: 
   openclaw: 
     emoji: "🔍︎"
