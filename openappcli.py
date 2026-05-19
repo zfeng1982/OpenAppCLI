@@ -49,6 +49,12 @@ def main():
     push_file_parser = subparsers.add_parser("push-file", help="发送文件到手机(包括图片,文本)")
     push_file_parser.add_argument("filepath", help="本地文件路径")
 
+    scroll_small_parser = subparsers.add_parser("scroll-small", help="轻微滚动屏幕")
+    scroll_small_parser.add_argument("type", choices=["up", "down"], help="滚动屏幕方向")
+
+    scroll_general_parser= subparsers.add_parser("scroll-general", help="常规滚动屏幕")
+    scroll_general_parser.add_argument("type", choices=["up", "down"], help="滚动屏幕方向")
+
     # 应用命令
     # 小红书发布相关命令
     xhs_publish_parser = subparsers.add_parser("xhs-publish", help="发布小红书笔记")
@@ -114,6 +120,12 @@ def main():
         # python openappcli.py sps search.xml
         elif args.cli == "sps":
             save_page_src(args.file_name)
+        elif args.cli == "scroll-small":
+            scroll_small_step(get_driver())
+            print("11")
+        elif args.cli == "scroll-general":
+            scroll_down_screens(get_driver())
+            print("222")
         # python openappcli.py xhs-publish album --count 2  --title "英国法院裁定三星向中兴赔偿" --content "从公开消息看，中兴通讯在德国、UPC和巴西等法院判决获得了支持。从外媒报道看，从2025年年初，德国、UPC、巴西等法院陆续判决，均支持中兴立场和报价。" --topics "新能源|五一假期"
         # python openappcli.py xhs-publish text --txttype thinking --itxt "多国法院支持中兴通讯的诉求" --title "多国法院支持中兴通讯的诉求" --content "更值得注意的是，英国法院自己在审理“Optis VS Apple”案时也曾使用Top-down进行交叉验证。" --topics "人山人海|五一假期"
         # python openappcli.py xhs-publish text --txttype longtxt --topics "辛芷蕾|五一假期" --title "辛芷蕾五一节和闺蜜自驾游，骑着10万元的自行车，还撞树手臂流血" --content "五一小长假大家都玩嗨了吧，平时忙到脚不沾地的明星，也终于能抽出时间好好放松了。咱们熟悉的女演员辛芷蕾，这次她这次晒图不小心把自己开的座驾露了出来，蓝色的家用车，市价大概在28万元左右，不算什么夸张的顶级豪车，走的就是实用舒适路线。大块头的车衬得人愈发小巧，辛芷蕾往那儿一站，气质优雅妩媚，谁能猜出来她已经40岁了。估计是常年练瑜伽的缘故，她的身材紧致利落，连一点多余的小肚子都没有，状态好到不像话。这次到了目的地，她先拉素颜的辛芷蕾皮肤状态依旧能打，白皙细腻不说，脸上连个明显的皱纹斑点都找不到，羡煞了一堆天天熬大夜的打工人。平时在娱乐圈轧戏跑活动，连睡个完整的好觉都难，能这么安安静静跟闺蜜坐一下午吹吹风，这种松弛感真的太戳人了"

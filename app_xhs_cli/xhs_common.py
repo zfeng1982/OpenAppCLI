@@ -166,7 +166,7 @@ def get_detail_info(driver,share_btn,is_all=False):
                             for i in range(20):
                                 views = driver.find_elements(AppiumBy.XPATH, "//android.view.View")
                                 if content == "":
-                                    print(f"title:{title}")
+                                    # print(f"title:{title}")
                                     titlecontent,content = get_details_video_text(driver)
                                     if titlecontent != "":
                                         title = titlecontent
@@ -389,6 +389,8 @@ def get_user_note_list(driver,author,target_count: int,max_swipe_count=10):
     collected = []  # 存放已抓取卡片的数据
     title_ary = []  # 用标题来去重
     swipe_count = 0
+    #先常规滚动下,否则遇到自己的主页,无法进行轻微的滚动
+    scroll_down_screens(driver,1,850)
     while len(collected) < target_count:
         # 定位 content-desc 以“笔记”或“视频”开头的元素
         xpath = "//*[starts-with(@content-desc, '笔记') or starts-with(@content-desc, '视频')]"
@@ -476,7 +478,7 @@ def get_details_narmal_text(driver):
        if content_ele:
             content = content_ele.find_element(AppiumBy.XPATH, "//android.widget.TextView[1]").text
    #只有内容没有title
-   print(f"narmal title:{title[:5]} content:{content[:10]}")
+   # print(f"narmal title:{title[:5]} content:{content[:10]}")
    return title,content
 
 def get_details_video_text(driver):
@@ -492,7 +494,7 @@ def get_details_video_text(driver):
         # if content.startswith("\n"):
         #     content = content[1:]
         title, _, content = content.partition('\n')
-    print(f"video title:{title[:5]} content:{content[:10]}")
+    # print(f"video title:{title[:5]} content:{content[:10]}")
     return title,content
 
 def back_index(driver, max_attempts=10):
