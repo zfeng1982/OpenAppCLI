@@ -1,12 +1,7 @@
-import re
 import sys
-import time
-
 from core import *
 import requests
-
-from util import element_on_clickable, element_clickable, element_located
-
+from util import element_on_clickable, element_located
 
 def extract_one_url(text: str) -> str:
     match = re.search(r'https?://\S+', text)
@@ -232,7 +227,7 @@ def get_detail_info(driver,share_btn,is_all=False):
                     if date and len(date) > 2:
                         break
     except Exception as e:
-        print(f"获取笔记详情失败:{e}")
+        print(f"get_detail_info获取笔记详情失败:{e}")
 
     return {
             "title": title,
@@ -304,6 +299,7 @@ def is_on_local(driver,local):
     except:
         print(f"没用选中:{local}")
         pass
+    return  False
 def get_user_index(driver):
     # xpath = "//android.widget.LinearLayout[count(child::*) >= 3 and child::*[1][self::android.view.ViewGroup] and child::*[2][self::android.widget.LinearLayout] and child::*[3][self::android.widget.LinearLayout]]"
     #
@@ -513,13 +509,6 @@ def get_details_video_text(driver):
     return title,content
 
 def back_index(driver, max_attempts=10):
-    """
-    通过多次返回操作回到首页，直到页面同时包含所有指定的文本元素。
-
-    :param driver: Appium driver 实例
-    :param xpath_texts: 需要同时存在的文本列表，例如 ['首页', '推荐']
-    :param max_attempts: 最大尝试次数（返回操作的次数）
-    """
     # 如果 driver 无效，尝试重连
     if not driver or not driver.session_id:
         driver.quit()
