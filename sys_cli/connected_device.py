@@ -11,15 +11,15 @@ def run(driver,args):
     config = load_config()
     device_config = config.get("device", {})
     device_name = device_config.get("deviceName")
-    udid = device_config.get("udid")
+    # udid = device_config.get("udid")
 
     print("=== Appium 配置信息 ===")
     print(f"Appium server: {get_appium_server_url()}")
     print(f"配置的设备名: {device_name}")
-    if udid:
-        print(f"配置的 udid: {udid}")
-    else:
-        print("未配置 udid，将使用 deviceName 作为标识")
+    # if udid:
+    #     print(f"配置的 udid: {udid}")
+    # else:
+    #     print("未配置 udid，将使用 deviceName 作为标识")
 
     server_url = get_appium_server_url()
     if is_local_url(server_url):

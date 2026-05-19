@@ -361,7 +361,7 @@ def run(args):
             if type == "text":
                 write_text_btn=wait.until(EC.element_to_be_clickable((AppiumBy.XPATH, "//android.widget.TextView[@text='写文字']") ))
                 write_text_btn.click()
-                if args.txttype=='idea':
+                if args.txttype=='thinking':
                     #写入想法和展示开说说
                     click_write_idea(driver,args.itxt,title,content,arytopics)
                     # .发布
