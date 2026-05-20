@@ -22,7 +22,7 @@ def goto_favorites(note_type):
         return True
     return False
 
-
+# starts-with(@text, '评论')
 def goto_like(note_type):
     if note_type == "video":
          ele=element_located(3, (AppiumBy.XPATH, "//android.widget.LinearLayout[@index=0 and count(child::*) = 2 "
