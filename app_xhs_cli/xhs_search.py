@@ -169,7 +169,7 @@ def run(args):
                 #         result["notes"] = notes
                 #     else:
                 #         print("暂不支持查看自己的笔记列表")
-                notes = get_user_note_list(driver, usr.get("user_name"), args.limit, 70)
+                notes = get_user_note_list(driver, usr.get("user_name"), args.limit, calculate_max_swipe(args.limit))
                 result["notes"] = notes
 
         # 搜索笔记
@@ -196,7 +196,7 @@ def run(args):
                     latest_btns[0].click()
                     time.sleep(1)#点击后等待
 
-            notes=collect_note_search_cards(driver,args.limit,70)
+            notes=collect_note_search_cards(driver,args.limit, calculate_max_swipe(args.limit))
             result["notes"] = notes
         print(json.dumps(result, ensure_ascii=False, indent=2))
         elapsed = time.time() - start_time

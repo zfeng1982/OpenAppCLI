@@ -101,7 +101,7 @@ def run(args):
             found_tab.click()
             # 确认local页面找到
             if is_on_local(driver, tab_text):
-                notes = collect_note_cards(driver, args.limit,40)
+                notes = collect_note_cards(driver, args.limit, calculate_max_swipe(args.limit))
                 result["notes"] = notes
     except Exception as e:
         print(f"({e})")

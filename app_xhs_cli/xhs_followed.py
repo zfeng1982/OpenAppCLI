@@ -127,7 +127,7 @@ def run(args):
             # 不作判断点击后会变化
             #  tab_text = follow_tab.get_attribute("content-desc")
             # if is_on_local(driver, tab_text):
-            notes = collect_note_cards(driver, args.limit,50)
+            notes = collect_note_cards(driver, args.limit, calculate_max_swipe(args.limit))
             result["notes"] = notes
     except Exception as e:
         print(f"({e})")

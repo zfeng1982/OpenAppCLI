@@ -6,6 +6,9 @@ from util import element_on_clickable, element_located
 def extract_one_url(text: str) -> str:
     match = re.search(r'https?://\S+', text)
     return match.group(0) if match else ""
+def calculate_max_swipe(target_count: int):
+     return round(target_count / 2)
+
 def expand_short_url(short_url: str) -> str:
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
@@ -71,11 +74,25 @@ def get_last_three_numbers_appium(driver):
         elements = driver.find_elements(AppiumBy.XPATH, "//android.widget.TextView")
         if len(elements) < 3:
             return None
-        last_three = elements[-3:]
 
-        texts = ["0" if el.text == "抢首评" else el.text for el in last_three]
-        if all(re.match(r'^\d+$', t) for t in texts):
-            return texts
+
+        # last_share_btn =element_located(1,(AppiumBy.XPATH, "(//android.widget.ImageView[@content-desc='分享'])[last()]"),False)
+        last_share_btn =element_located(1,(AppiumBy.XPATH, "//android.view.ViewGroup[@index=1 and count(child::*) = 4 "
+                                                           " and child::*[1][self::android.widget.ImageView and @index=0] "
+                                                           " and child::*[2][self::android.widget.ImageView and @index=1] "
+                                                           " and child::*[3][self::android.widget.ImageView and @index=2 and @content-desc='分享'] "
+                                                           " and child::*[4][self::android.widget.TextView and @index=3] "
+                                                           "]"),False)
+        if last_share_btn and len(elements)>3:
+            last_three = elements[-4:-1]
+        else:
+            last_three = elements[-3:]
+
+
+        texts = ["0" if el.text == "抢首评" or el.text == "评论" or el.text=="点赞" or el.text=="收藏" else el.text for el in last_three]
+        # if all(re.match(r'^\d+$', t) for t in texts):
+        #     print(f"textslen:{len(texts)}")
+        return texts
     except Exception as e:
         print(f"获取互动数据失败:{e})")
     return None
@@ -95,34 +112,34 @@ def get_detail_info(driver,share_btn,is_all=False):
     content = ""
     try:
         note_type = "video" if share_btn.get_attribute("content-desc") == "分享" else "normal"
-        # 2. 获取评论数（content-desc 以 '评论' 开头的 Button）
-        try:
-            # 使用 find_elements 避免找不到时报错
-            comment_btns = driver.find_elements(AppiumBy.XPATH,
-                                                "//android.widget.Button[starts-with(@content-desc, '评论')]")
-            if comment_btns:
-                comment_num = comment_btns[0].get_attribute("content-desc").replace('评论',"")
-
-        except Exception as e:
-            print(f"获取评论数失败")
-            # 3. 获取收藏数（content-desc 以 '收藏' 开头的 Button）
-        try:
-            collect_btns = driver.find_elements(AppiumBy.XPATH,
-                                                "//android.widget.Button[starts-with(@content-desc, '收藏')]")
-            if collect_btns:
-                favorites_num = collect_btns[0].get_attribute("content-desc").replace('收藏',"")
-
-        except Exception as e:
-            print(f"获取收藏数失败")
-        #用于广告详情页的互动指标
-        # print(f"comment_num:{comment_num},favorites_num:{favorites_num}")
+        # # 2. 获取评论数（content-desc 以 '评论' 开头的 Button）
+        # try:
+        #     # 使用 find_elements 避免找不到时报错
+        #     comment_btns = driver.find_elements(AppiumBy.XPATH,
+        #                                         "//android.widget.Button[starts-with(@content-desc, '评论')]")
+        #     if comment_btns:
+        #         comment_num = comment_btns[0].get_attribute("content-desc").replace('评论',"")
+        #
+        # except Exception as e:
+        #     print(f"获取评论数失败")
+        #     # 3. 获取收藏数（content-desc 以 '收藏' 开头的 Button）
+        # try:
+        #     collect_btns = driver.find_elements(AppiumBy.XPATH,
+        #                                         "//android.widget.Button[starts-with(@content-desc, '收藏')]")
+        #     if collect_btns:
+        #         favorites_num = collect_btns[0].get_attribute("content-desc").replace('收藏',"")
+        #
+        # except Exception as e:
+        #     print(f"获取收藏数失败")
+        # #用于广告详情页的互动指标
+        # # print(f"comment_num:{comment_num},favorites_num:{favorites_num}")
 
         interaction_metrics=get_last_three_numbers_appium(driver)
         if interaction_metrics and len(interaction_metrics)>=3:
             like_num = interaction_metrics[0]
-            if comment_num == "" and favorites_num == "":
-                favorites_num = interaction_metrics[1]
-                comment_num=interaction_metrics[2]
+            # if comment_num == "" and favorites_num == "":
+            favorites_num = interaction_metrics[1]
+            comment_num=interaction_metrics[2]
         if share_btn:
             share_btn.click()
             # time.sleep(1)
