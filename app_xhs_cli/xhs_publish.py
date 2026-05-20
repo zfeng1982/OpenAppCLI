@@ -333,7 +333,8 @@ def run(args):
         #1.点击+
         driver.find_element(AppiumBy.ACCESSIBILITY_ID, "发布").click()
         wait = WebDriverWait(driver, 10)
-        content = args.content  # 字符串或 None
+        content = args.content.replace('\\n', '\n')  # 字符串或 None
+        content.replace('\\n', '\n')
         title = args.title  # 字符串或 None
         topics = args.topics  # 字符串或 None
         arytopics=topics.split("|") if topics is not None else []

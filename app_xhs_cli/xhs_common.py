@@ -7,7 +7,7 @@ def extract_one_url(text: str) -> str:
     match = re.search(r'https?://\S+', text)
     return match.group(0) if match else ""
 def calculate_max_swipe(target_count: int):
-     return round(target_count / 2)
+     return round(target_count / 1.5)
 
 def expand_short_url(short_url: str) -> str:
     headers = {
