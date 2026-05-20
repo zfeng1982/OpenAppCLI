@@ -22,7 +22,7 @@ metadata:
     - 从相册选择(可把相片从电脑同步到手机)
     - 写想法
     - 写长文并支持长文模板
-  - 支持根据笔记ID进行互动,包括评论,点赞,回复
+  - 支持根据笔记ID进行互动,包括评论,点赞,收藏
   - 支持结构化(Json)获取数据
     - 首页的关注,发现,LBS笔记列表
     - 个人主页帐户信息
@@ -187,9 +187,25 @@ python scripts/openappcli.py xhs-comment [--note_id <笔记ID>] [--text <内容>
 ```bash
 python openappcli.py xhs-comment --note_id "6a01920f0000000036033ce7" --text "不错找个时间去看下!!" --note_type video
 ```
-### 4.点赞(xhs-like)
-### 5.收藏(xhs-favorites)
-### 6.获取首页笔记列表(xhs-index)
+### 4.点赞和收藏(xhs-interaction)
+点赞/取消点赞,收藏/取消收藏
+用法:
+```bash
+python scripts/openappcli.py xhs-interaction [--note_id <笔记ID>] [--note_type {normal,video}] [--action {favorites,like}]
+```
+参数:
+- `--note_id`：笔记的ID,可通过列表接口获取
+- `--note_type`：笔记类型normal为图文,video为视频,可能过列表接口获取
+- `--action`：favorites 收藏,like 点赞
+示例:
+```bash
+#收藏视频笔记(重复执行即为消取收藏)
+python scripts/openappcli.py xhs-interaction --note_id "69435de2000000001e039058" --note_type video --action favorites
+#点赞图文笔记(重复执行即为消取点赞)
+python scripts/openappcli.py xhs-interaction --note_id "69f13c090000000023017c85" --note_type normal --action like
+
+```
+### 5.获取首页笔记列表(xhs-index)
 从上到下滑动获取首页笔记列表,包括discover(发现), followed(关注),lbs(同城LBS)  
 用法:
 ```bash
@@ -221,7 +237,7 @@ python scripts/openappcli.py xhs-index discover  --limit 5
       }
     }
 ```
-### 7.搜索博主(xhs-search user)
+### 6.搜索博主(xhs-search user)
 搜索博主信息,可选择同时返回博主的笔记
 用法:
 ```bash
@@ -274,7 +290,7 @@ python scripts/openappcli.py xhs-search user --keyword "辛芷蕾"
 }
 
 ```
-### 8.搜索日记(xhs-search note)
+### 7.搜索日记(xhs-search note)
 搜索博主信息,可选择同时返回博主的笔记
 用法:
 ```bash
@@ -310,7 +326,7 @@ python scripts/openappcli.py xhs-search note --keyword "我拍到了海鸥雨" -
   }
 }
 ```
-### 9.获取和下载笔记详情内容(xhs-details)
+### 8.获取和下载笔记详情内容(xhs-details)
 根据笔记ID获取详情包括文本,图片和视频.
 用法:
 ```bash
