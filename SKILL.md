@@ -46,7 +46,7 @@ metadata:
    - 出于安装考虑不建议使用自己日常的手机给Agent进行操作
    - 本技能只支持Android系统的手机
    - 建议使用真机进行自动化操作,理论上可以使用模拟器和云手机
-   - 如果使用真机连接电脑,建议使用原厂的USB线,或者质量较好的数据线.(选最粗的一条线)
+   - 如果使用真机连接电脑,建议使用原厂的USB线,或者质量较好的数据线(选最粗的一条线).
    
 2. 手机设置
    - 开启“开发者选项”,连续点击“版本号”7次可开启,不同手机可能开启方式不一样,请自行搜索开启
@@ -77,13 +77,13 @@ metadata:
 
 
 ## 环境确认
-1. adb安装确认,如下执行adb devices命令,返回手机设备信息,请记住这个设备ID,yaml配置文件需要.命令执行失败请检查adb是否安装成功,特别是环境变量  
+1. adb安装确认,如下执行adb devices命令,返回手机设备信息,请记住这个设备ID,config.yaml配置文件需要.命令执行失败请检查adb是否安装成功,特别是环境变量  
 ```bash
 PS C:\Users\pan> adb devices
 List of devices attached
 [你手机的设备ID]        device  
 ```
-2. 获取系统默认输入法,如下执行adb shell ime list -s命令,返回手机上的输入法,请忽略UnicodeIME和AppiumIME,记下你手机上安装的输入法,我的手机是com.baidu.input_huawei/.ImeService,yaml配置文件需要
+2. 获取系统默认输入法,如下执行adb shell ime list -s命令,返回手机上的输入法,请忽略UnicodeIME和AppiumIME,我的手机是com.baidu.input_huawei/.ImeService,记下你手机上安装的输入法config.yaml配置文件需要.
 ```bash
 
 PS C:\Users\pan> adb shell ime list -s
@@ -91,7 +91,7 @@ com.baidu.input_huawei/.ImeService
 io.appium.settings/.UnicodeIME
 io.appium.settings/.AppiumIME
 ```
-3. 修改scripts/config.yaml文件,修改两个值
+3. 修改scripts/config.yaml文件中的两个值
    - deviceName: "你的设备序列号"
    - IME: 你通过上面命令获取的输入法,例如我的是:com.baidu.input_huawei/.ImeService
 

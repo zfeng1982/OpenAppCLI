@@ -264,7 +264,8 @@ def scroll_small_step(driver, step_ratio=0.1, up=True):
     h = size["height"]
     w = size["width"]
     start_x = w // 2
-    start_y = h // 2
+    # start_y = h // 2
+    start_y = int(h * 0.8)
     offset = int(h * step_ratio)
     end_y = start_y - offset if up else start_y + offset
     driver.swipe(start_x, start_y, start_x, end_y, duration=200)
@@ -299,7 +300,7 @@ def scroll_down_screens(driver, screens=1, swipe_duration=300):
                 end_y = int(size['height'] * 0.2)
         if not success:
             raise Exception("滑动多次失败，连接可能已断开")
-        time.sleep(2)  # 等待内容加载
+        time.sleep(1)  # 等待内容加载
 
 
 
