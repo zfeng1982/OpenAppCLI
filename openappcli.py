@@ -143,7 +143,7 @@ def main():
             if args.cli == "xhs-publish":
                 xhs_publish.run(args)
             # python openappcli.py xhs-search user --keyword "辛芷蕾" --note --limit 50
-            # python openappcli.py xhs-search user --keyword "信息蒸馏研究所" --limit 5
+            # python openappcli.py xhs-search user --keyword "信息蒸馏研究所" --note --limit 5
             # python openappcli.py xhs-search user --keyword "罗振宇" --limit 5
             # python openappcli.py xhs-search note --keyword "五一假期" --order new --limit 5
             # python openappcli.py xhs-search note --keyword "我拍到了海鸥雨" --order com --limit 5

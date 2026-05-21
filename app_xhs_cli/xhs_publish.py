@@ -311,11 +311,12 @@ def click_long_content(driver,title:str,content:str,topics):
     )
     format_btn.click()
     print("✅ 已点击“一键排版”")
-    time.sleep(18)
+    # 这个时间特别长
+    time.sleep(10)
     #随机选择一个排版
     select_random_layout_and_next(driver)
     #使用AI生成的小结
-    time.sleep(5)
+    time.sleep(2)
     click_use_button(driver)
     time.sleep(0.5)
     driver.execute_script("mobile: type", {"text": '\n'})
@@ -334,7 +335,6 @@ def run(args):
         driver.find_element(AppiumBy.ACCESSIBILITY_ID, "发布").click()
         wait = WebDriverWait(driver, 10)
         content = args.content.replace('\\n', '\n')  # 字符串或 None
-        content.replace('\\n', '\n')
         title = args.title  # 字符串或 None
         topics = args.topics  # 字符串或 None
         arytopics=topics.split("|") if topics is not None else []
@@ -343,8 +343,7 @@ def run(args):
             if  type=="album":
                 image_count = args.count  # 整数，默认1
                 one_tap = args.one_tap  # True/False
-
-                print(f" image_count:{image_count} one_tap:{one_tap} title:{title} content:{content} topics:{topics}")
+                # print(f" image_count:{image_count} one_tap:{one_tap} title:{title} content:{content} topics:{topics}")
                 # 从相册选择
                 album_btn = wait.until(EC.element_to_be_clickable((AppiumBy.XPATH, "//android.widget.TextView[@text='从相册选择']")))
                 album_btn.click()
@@ -367,7 +366,7 @@ def run(args):
                     click_write_idea(driver,args.itxt,title,content,arytopics)
                     # .发布
                     publish_btn = wait.until( EC.element_to_be_clickable((AppiumBy.XPATH, "//android.widget.Button[@text='发布笔记']")))
-                    time.sleep(1)
+                    # time.sleep(1)
                     publish_btn.click()
                     print("✅ 想法笔记发布成功")
                 elif args.txttype=='longtxt':
@@ -375,7 +374,7 @@ def run(args):
                     # .发布
                     publish_btn = wait.until(
                         EC.element_to_be_clickable((AppiumBy.XPATH, "//android.widget.Button[@text='发布笔记']")))
-                    time.sleep(1)
+                    # time.sleep(1)
                     publish_btn.click()
                     print("✅ 长文本笔记发布成功")
                 break

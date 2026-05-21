@@ -48,7 +48,7 @@ def run(args):
         edit_text.clear()
         edit_text.send_keys(args.text)
         send_mark()
-        print("评论已发布")
+        print("✅ 评论已发布")
     except Exception as e:
         print(f"run错误: {e}")
         sys.exit(2)
