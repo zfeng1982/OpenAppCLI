@@ -392,8 +392,6 @@ def get_user_note_list(driver,author,target_count: int,max_swipe_count=10):
     collected = []  # 存放已抓取卡片的数据
     title_ary = []  # 用标题来去重
     swipe_count = 0
-    #先常规滚动下,否则遇到自己的主页,无法进行轻微的滚动
-    scroll_down_screens(driver,1,850)
     while len(collected) < target_count:
         # 定位 content-desc 以“笔记”或“视频”开头的元素
         xpath = "//*[starts-with(@content-desc, '笔记') or starts-with(@content-desc, '视频')]"
