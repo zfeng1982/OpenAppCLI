@@ -139,10 +139,10 @@ def run(args):
             (AppiumBy.CLASS_NAME, "android.widget.EditText")
         ))
         input_box.send_keys(keyword)
-        time.sleep(1) #输入完后等待一下
+        time.sleep(0.1) #输入完后等待一下
 
         driver.execute_script('mobile: performEditorAction', {'action': 'search'})
-        time.sleep(1)  # 简单等待，或使用显式等待某个结果元素
+        # time.sleep(1)  # 简单等待，或使用显式等待某个结果元素
         result = {}
         if args.type=='user':
             user_tab = wait.until(EC.element_to_be_clickable(
@@ -150,7 +150,7 @@ def run(args):
             ))
             user_tab.click()
             # print("✓ 已切换到“用户”标签页")
-            time.sleep(1)  # 等待用户列表加载
+            # time.sleep(1)  # 等待用户列表加载
             # 点击第一个用户条目
             first_user = wait.until(
                 EC.presence_of_all_elements_located((AppiumBy.XPATH, "//android.view.ViewGroup[contains(@content-desc, '粉丝')][1]"))

@@ -110,30 +110,9 @@ def get_detail_info(driver,share_btn,is_all=False):
     location=""
     distance=""
     content = ""
+    author=""
     try:
         note_type = "video" if share_btn.get_attribute("content-desc") == "分享" else "normal"
-        # # 2. 获取评论数（content-desc 以 '评论' 开头的 Button）
-        # try:
-        #     # 使用 find_elements 避免找不到时报错
-        #     comment_btns = driver.find_elements(AppiumBy.XPATH,
-        #                                         "//android.widget.Button[starts-with(@content-desc, '评论')]")
-        #     if comment_btns:
-        #         comment_num = comment_btns[0].get_attribute("content-desc").replace('评论',"")
-        #
-        # except Exception as e:
-        #     print(f"获取评论数失败")
-        #     # 3. 获取收藏数（content-desc 以 '收藏' 开头的 Button）
-        # try:
-        #     collect_btns = driver.find_elements(AppiumBy.XPATH,
-        #                                         "//android.widget.Button[starts-with(@content-desc, '收藏')]")
-        #     if collect_btns:
-        #         favorites_num = collect_btns[0].get_attribute("content-desc").replace('收藏',"")
-        #
-        # except Exception as e:
-        #     print(f"获取收藏数失败")
-        # #用于广告详情页的互动指标
-        # # print(f"comment_num:{comment_num},favorites_num:{favorites_num}")
-
         interaction_metrics=get_last_three_numbers_appium(driver)
         if interaction_metrics and len(interaction_metrics)>=3:
             like_num = interaction_metrics[0]
@@ -161,6 +140,13 @@ def get_detail_info(driver,share_btn,is_all=False):
 
 
         if is_all:
+            # 获取作者
+            view_group = element_located(1, (AppiumBy.XPATH,
+                                               "//android.view.ViewGroup[@index=0 and count(child::*) = 1 and child::*[1][self::android.widget.TextView and @index=0]  and parent::android.widget.LinearLayout[@index=1] ]"),
+                                         False
+                                         )
+            if view_group:
+                author = view_group.find_element(AppiumBy.XPATH, "//android.widget.TextView").text
             date_pattern = re.compile(
                 r"\d{1,2}-\d{1,2}|\d{4}-\d{1,2}-\d{1,2}|\d+分钟前|\d+小时前|刚刚|今天|昨天|\d+天前")
             # 展开获取日期
@@ -236,7 +222,7 @@ def get_detail_info(driver,share_btn,is_all=False):
             "title": title,
             "content": content,
             "note_id": note_id,
-            "author": "",
+            "author": author,
             "date": date,
             "like_num": like_num,
             "comment_num": comment_num,

@@ -138,11 +138,13 @@ def main():
         elif args.cli.startswith("xhs-"):
             app_caps = apps["xhs"]
             driver = get_driver(app_caps['appPackage'], app_caps['appActivity'])
-            # 回到首页再执行
-            back_index(driver)
+
+            if args.cli not in["xhs-details","xhs-comment","xhs-interaction"]:
+                # 回到首页再执行
+                back_index(driver)
             if args.cli == "xhs-publish":
                 xhs_publish.run(args)
-            # python openappcli.py xhs-search user --keyword "辛芷蕾" --note --limit 50
+            # python openappcli.py xhs-search user --keyword "辛芷蕾" --note --limit 10
             # python openappcli.py xhs-search user --keyword "信息蒸馏研究所" --note --limit 5
             # python openappcli.py xhs-search user --keyword "罗振宇" --limit 5
             # python openappcli.py xhs-search note --keyword "五一假期" --order new --limit 5
@@ -168,6 +170,7 @@ def main():
             # python openappcli.py xhs-details --note_id "6989aaf100000000090384d9" --note_type normal --dir "c:\xhs"
             # python openappcli.py xhs-details --note_id "69fec1870000000035023f32" --note_type normal --dir "c:\xhs"
             # python openappcli.py xhs-details --note_id "69fec1870000000035023f32" --note_type normal --dir "c:\xhs"
+            # python openappcli.py xhs-details --note_id "6a0d7cf5000000003501e132" --note_type normal --dir "c:\xhs"
             elif args.cli == "xhs-details":
                 xhs_details.run(args)
             # python openappcli.py xhs-index discover  --limit 5

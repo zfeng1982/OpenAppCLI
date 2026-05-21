@@ -1,3 +1,5 @@
+import time
+
 from PIL import Image
 import io
 import base64
@@ -178,7 +180,7 @@ def run(args):
     try:
         deep_link_url = f"xhsdiscover://item/{args.note_id}?type={args.note_type}"
         driver.execute_script('mobile: deepLink', { 'url': f'{deep_link_url}',})
-        text_views = []
+        # text_views = []
         video_save_path = []
         image_sava_path = []
         save_resource_dir=args.dir+"\\"+args.note_id
@@ -190,65 +192,60 @@ def run(args):
             print("详情获取失败")
             return
 
-        note["note_text"]=get_detail_info(driver,share_btn,True)
         # 需要开启 ADB 功能 (安全，推荐)	appium --allow-insecure=uiautomator2:adb_shell
         if args.note_type=="video":
-
+            note["note_text"] = get_detail_info(driver, share_btn, True)
             minutes,seconds=get_video_duration(driver)
             if share_btn:
                 before_mobile_video_count=count_xhs_mp4_files(driver)
                 share_btn.click()
                 time.sleep(1)
                 swipe_left_at_bottom(driver)
+                save_button_xpath="//android.widget.Button[@content-desc='保存']"
                 save_option = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((AppiumBy.XPATH, "//*[contains(@text, '保存')]"))
+                    EC.presence_of_element_located((AppiumBy.XPATH, save_button_xpath))
                 )
                 save_option.click()
-                # 下载视频的等待时间
-                # 根据视频长度计算sleep时间
-                save_wait_time=30
-                if minutes>0 or seconds>0:
-                    # 等待时间为视频长度的1/2,如一段一分钟的视频,等待30s
-                    save_wait_time=round((minutes * 60 + seconds) / 2.0, 1)
-                print(f"视频时长:{minutes}分{seconds}秒,等待视频操作:{save_wait_time}秒")
-                time.sleep(save_wait_time)
-                # 下载前和下载后文件数量一样则表示,下载失败
-                after_mobile_video_count = count_xhs_mp4_files(driver)
-                # print(f"before_mobile_video_count:{before_mobile_video_count},after_mobile_video_count:{after_mobile_video_count}")
-                if 0 <= before_mobile_video_count < after_mobile_video_count and after_mobile_video_count>=0:
-                    latest_video_path=get_latest_video_path(driver)
-                    # print(f"latest_video_path:{latest_video_path}")
-                    save_dir = save_resource_dir
-                    if latest_video_path:
-                        # 从手机拉取文件（返回 Base64 字符串）
-                        file_data_base64 = driver.pull_file(latest_video_path)
-                        # 解码为字节
-                        file_data = base64.b64decode(file_data_base64)
-                        # 写入本地文件
-                        local_dir=os.path.join(save_dir, 'video.mp4')
-                        with open(local_dir, 'wb') as f:
-                            f.write(file_data)
-                        print(f"视频已保存至: {local_dir}")
-                        delete_xhs_video(driver,latest_video_path)
-                        video_save_path.append(local_dir)
-                    else:
-                        print(f"未找到下载的视频文件:{latest_video_path}")
+                time.sleep(1)
+                ##如果点击保存后,保存按钮还在则说明无法保存
+                if element_located(1, (AppiumBy.XPATH, save_button_xpath), False):
+                    print(f"作者已关闭视频下载权限,无法保存")
                 else:
-                    print(f"文件下载失败,确认作者是否充许保存")
-
+                    # 下载视频的等待时间
+                    # 根据视频长度计算sleep时间
+                    save_wait_time=30
+                    if minutes>0 or seconds>0:
+                        # 等待时间为视频长度的1/2,如一段一分钟的视频,等待30s
+                        save_wait_time=round((minutes * 60 + seconds) / 2.0, 1)
+                    print(f"视频时长:{minutes}分{seconds}秒,等待视频操作:{save_wait_time}秒")
+                    time.sleep(save_wait_time)
+                    # 下载前和下载后文件数量一样则表示,下载失败
+                    after_mobile_video_count = count_xhs_mp4_files(driver)
+                    # print(f"before_mobile_video_count:{before_mobile_video_count},after_mobile_video_count:{after_mobile_video_count}")
+                    if 0 <= before_mobile_video_count < after_mobile_video_count and after_mobile_video_count>=0:
+                        latest_video_path=get_latest_video_path(driver)
+                        # print(f"latest_video_path:{latest_video_path}")
+                        save_dir = save_resource_dir
+                        if latest_video_path:
+                            # 从手机拉取文件（返回 Base64 字符串）
+                            file_data_base64 = driver.pull_file(latest_video_path)
+                            # 解码为字节
+                            file_data = base64.b64decode(file_data_base64)
+                            # 写入本地文件
+                            local_dir=os.path.join(save_dir, 'video.mp4')
+                            with open(local_dir, 'wb') as f:
+                                f.write(file_data)
+                            print(f"视频已保存至: {local_dir}")
+                            delete_xhs_video(driver,latest_video_path)
+                            video_save_path.append(local_dir)
+                        else:
+                            print(f"未找到下载的视频文件:{latest_video_path}")
+                    else:
+                        print(f"文件下载失败,确认作者是否充许保存")
                 note["video_save_path"]=video_save_path
                 note["images_save_path"] = image_sava_path
 
         else:
-
-            scroll_small_step(driver)
-            time.sleep(0.5)
-            all_textviews = driver.find_elements(AppiumBy.XPATH, "//android.widget.TextView")
-            # 遍历查找文本为 "关注" 的 TextView
-            for i, tv in enumerate(all_textviews):
-                text = tv.text.strip()
-                if len(text) > 10:
-                    text_views.append(text)
             c,m=get_image_progress(driver)
             if c and m:
                 # 点击放大图片
@@ -258,7 +255,7 @@ def run(args):
                        filePath=save_full_screenshot(driver,save_resource_dir,str(i+1))
                        image_sava_path.append(filePath)
                        swipe_left(driver)
-            note["text_views"]=text_views
+            note["note_text"] = get_detail_info(driver, share_btn, True)
             note["images_save_path"]=image_sava_path
             note["video_save_path"] = video_save_path
         print(json.dumps(note, ensure_ascii=False, indent=2))
