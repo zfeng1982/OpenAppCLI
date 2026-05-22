@@ -152,7 +152,7 @@ python openappcli.py sps search.xml
 发布相册笔记,相片使用push-file命令推送到手机  
 用法:
 ```bash
-python scripts/openappcli.py xhs-publish alum  [--count <相片数量>] [--title <笔记标题>] [--content <笔记内容>] [--topics <话题1|话题2|话题3>]
+python scripts/openappcli.py xhs-publish album  [--count <相片数量>] [--title <笔记标题>] [--content <笔记内容>] [--topics <话题1|话题2|话题3>]
 ```
 参数:
 - `--count`：打开相册时选择发布相片的数量(使用相册的默认排序进行选择)
