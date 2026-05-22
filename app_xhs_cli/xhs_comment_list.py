@@ -70,10 +70,7 @@ def run(args):
               comment_node["note_id"] = args.note_id
               comment_node["comment_sum"]=text_view.text
               comment_node["comment_list"]=comment_list(driver,args.limit,args.limit)
-            else:
-                print("1111")
-        else:
-            print("2222")
+
 
 
     except Exception as e:
