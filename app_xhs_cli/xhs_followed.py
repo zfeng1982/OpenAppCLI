@@ -108,7 +108,7 @@ def collect_note_cards(driver,target_count: int,max_swipe_count=10):
             print("迷路了重新开始吧")
         else:
             # 滚动加载更多
-            scroll_small_step(driver, 0.2)
+            scroll_small_step(driver, 0.25)
         time.sleep(1)
         swipe_count=swipe_count+1
     return collected
