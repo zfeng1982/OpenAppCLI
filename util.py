@@ -17,6 +17,20 @@ def element_located(timeout,locator: tuple[str, str],is_exit=True):
             sys.exit(1)
     return ele
 
+def element_located_all(timeout,locator: tuple[str, str],is_exit=True):
+    # 等待元素出现在DOM中（即页面源码中存在该元素），但不一定可见或可交互。
+    # 只要元素存在（哪怕被遮挡、透明度为0、display: none、disabled等），就会返回元素。
+    # 通常用于等待元素加载完成，但后续还需要进一步判断可见性或可点击性。
+    eles = None
+    try:
+        eles = WebDriverWait(get_driver(), timeout).until(EC.presence_of_all_elements_located((locator[0], locator[1])))
+    except Exception as e:
+        if eles is None and is_exit:
+            method_name = inspect.currentframe().f_back.f_code.co_name
+            print(f"等待超时,timeout:{timeout},exit:{is_exit},mark:{method_name},path:{locator[1]}")
+            sys.exit(1)
+    return eles
+
 def element_clickable(timeout,locator: tuple[str, str],is_exit=True):
     # 等待元素满足以下所有条件：
     # 元素存在于 DOM 中

@@ -36,6 +36,7 @@ metadata:
     - 正文,LBS,作者,发布时间等信息
     - 下载视频笔记
     - 下载图片笔记
+    - 评论列表
   - 搜索
     - 搜索博主
     - 搜索笔记
@@ -368,6 +369,44 @@ python openappcli.py xhs-details --note_id "69f54d4e0000000020038635" --note_typ
   "_field_comments": {
     "video_save_path": "note_type=video 时才会有值",
     "images_save_path": "note_type=normal 时才会有值"
+  }
+}
+```
+### 9.获取评论列表(xhs-comment-list)
+根据笔记ID获取评论列表,只返回一级的评论内容,不包括回复
+用法:
+```bash
+python scripts/openappcli.py openappcli.py xhs-comment-list [--note_id <笔记ID>] [--note_type {normal,video}]  [--limit <返回评论数量>]
+```
+参数:
+- `--note_id`：笔记ID,可从笔记列表中获取
+- `--note_type`：笔记类型,normal(图文)和video(视频)二选一,可从笔记列表中获取
+- `--limit`：返回评论数量
+示例:
+```bash
+python openappcli.py xhs-comment-list --note_id "6a0a94d4000000003601ec7a" --note_type normal --limit 2
+```
+输出:
+```json
+{
+  "note_id": "6a0a94d4000000003601ec7a",
+  "comment_sum": "共 239 条评论",
+  "comment_list": [
+    {
+      "nick_name": "珺仔",
+      "content": "他是累坏的，又不是跑坏的[失望R]  ",
+      "date_and_lbs": "3天前 广西 ",
+      "like_num": "141"
+    },
+    {
+      "nick_name": "未央",
+      "content": "最主要的不是跑步猝死[失望R]而是睡眠不足[失望R]，睡眠不足耗心阳的啊[失望R]说白了就是提前透支你的阳气，肺气，没看熬夜之后第二天早起，就会感觉气短胸闷[失望R]  ",
+      "date_and_lbs": "3天前 黑龙江 ",
+      "like_num": "1"
+    }
+  ],
+  "_field_comments": {
+    "comment_sum": "评论总数为评论数+回复数"
   }
 }
 

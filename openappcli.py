@@ -14,7 +14,7 @@ from sys_cli import connected_device
 from sys_cli import check_status
 from sys_cli import launch_app
 from sys_cli import push_file
-from app_xhs_cli import xhs_publish
+from app_xhs_cli import xhs_publish, xhs_comment_list
 from app_xhs_cli import xhs_search
 from app_xhs_cli import xhs_details
 from app_xhs_cli import xhs_discover
@@ -97,7 +97,10 @@ def main():
     xhs_interaction_parser.add_argument("--note_type", required=True, choices=["video", "normal"],help="笔记类型精准匹配(必填)")
     xhs_interaction_parser.add_argument("--action", required=True, choices=["like", "favorites"], help="like喜欢,favorites收藏,同一篇笔记第一次点击为确认,第二次点击为取消")
 
-
+    xhs_comment_list_parser = subparsers.add_parser("xhs-comment-list", help="获得评论列表")
+    xhs_comment_list_parser.add_argument("--note_id", required=True, help="精准匹配(必填)")
+    xhs_comment_list_parser.add_argument("--note_type", required=True, choices=["video", "normal"],help="笔记类型精准匹配(必填)")
+    xhs_comment_list_parser.add_argument("--limit", type=int, default=10, help="返回评论条数")
 
     args = parser.parse_args()
 
@@ -139,7 +142,7 @@ def main():
             app_caps = apps["xhs"]
             driver = get_driver(app_caps['appPackage'], app_caps['appActivity'])
 
-            if args.cli not in["xhs-details","xhs-comment","xhs-interaction"]:
+            if args.cli not in["xhs-details","xhs-comment","xhs-interaction","xhs-comment-list"]:
                 # 回到首页再执行
                 back_index(driver)
             if args.cli == "xhs-publish":
@@ -184,6 +187,8 @@ def main():
                     xhs_lbs.run(args)
             elif args.cli=="xhs-comment":
                 xhs_comment.run(args)
+            elif args.cli=="xhs-comment-list":
+                xhs_comment_list.run(args)
             elif args.cli=="xhs-interaction":
                 xhs_interaction.run(args)
         else:
