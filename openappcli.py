@@ -66,7 +66,7 @@ def main():
     xhs_publish_parser.add_argument("--content", type=str, help="内容")
     xhs_publish_parser.add_argument("--itxt", type=str, help="想法")
     xhs_publish_parser.add_argument("--topics", type=str, help="话题,话题之间用|分隔如:自动化|小红书")
-    xhs_publish_parser.add_argument("--txttype", choices=["idea", "longtxt"], help="选择'写想法'或'写长文'")
+    xhs_publish_parser.add_argument("--txttype", choices=["thinking", "longtxt"], help="选择'写想法'或'写长文'")
 
     # 小红书搜索
     xhs_search_parser = subparsers.add_parser("xhs-search", help="小红书搜索笔记")
