@@ -6,6 +6,9 @@ import easyocr
 import io
 import numpy as np
 from . import _WX_INDEX_TAB_KEYWORD_,_WX_CONF_PATH_
+from .wx_page_identify import index_page_indentify
+
+
 # bbox 用二维数组表示，每个元素是一个角的 [x, y] 坐标：
 #  bbox[0]                  bbox[1]
 #          ┌──────────────┐
@@ -76,27 +79,7 @@ def get_click_pos_conf():
     if  raw_config and len(raw_config)==7:
        print("从配置中读取click pos")
        return raw_config
-    screen = driver.get_screenshot_as_png()
-    # 初始化（首次会自动下载模型，约 100MB）
-    # pip install easyocr
-    reader = easyocr.Reader(['ch_sim', 'en'], gpu=True)
-    img = Image.open(io.BytesIO(screen)).convert('RGB')
-    img_np = np.array(img)
-    h, w = img_np.shape[:2]
-    results = reader.readtext(img_np)
-    tabs = []
-    for (bbox, text, prob) in results:
-        # 四个tab的文本在屏幕最下方85%处的
-        if  text  in _WX_INDEX_TAB_KEYWORD_ and  bbox[0][1]>h*0.85:
-            # print(f"test: {text.strip()}  bbox[0][0] X:{bbox[0][0]} bbox[0][1] Y:{bbox[0][1]}")
-            tabs.append({
-                'name': text.strip(),
-                'left_up_x': bbox[0][0],
-                'left_up_y': bbox[0][1],
-                'right_up_x': bbox[1][0],
-                'right_up_y': bbox[1][1],
-            })
-    tabs.sort(key=lambda k: k['left_up_x'])
+    is_index,tabs,_=index_page_indentify()
     if len(tabs)!=4:
         print("请确认微信已切换到聊天列表tab")
         return False,None
@@ -106,7 +89,6 @@ def get_click_pos_conf():
     input_box_pos=(tabs[1].get("right_up_x"),tabs[1].get("right_up_y"))
     # 计算发送按刍位置,直接用'我'右上角坐
     send_button_pos = (tabs[3].get("right_up_x"), tabs[3].get("right_up_y"))
-
     data = {
         "pos": {
             device_name: {  # 动态设备ID
