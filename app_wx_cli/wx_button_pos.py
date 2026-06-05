@@ -77,7 +77,7 @@ def get_click_pos_conf():
 
     raw_config= read_raw_config(device_name)
     if  raw_config and len(raw_config)==7:
-       print("从配置中读取click pos")
+       # print("从配置中读取click pos")
        return raw_config
     is_index,tabs,_=index_page_indentify()
     if len(tabs)!=4:

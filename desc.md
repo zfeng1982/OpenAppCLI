@@ -40,6 +40,36 @@
 7. pyyaml,request,PIL(pillow)
 8. ucdevtools 定位webview元素
 
+## 用法
+```bash
+ android.widget.LinearLayout[
+            @index=0
+            and count(child::*) = 2
+            and child::*[1][self::android.widget.ImageView and @index=0]
+            and child::*[2][self::android.widget.TextView and @index=1 and not(@text='说点什么...') and not(@text='公开可见')]
+            and parent::android.widget.LinearLayout[@index=1]
+        ]
+        android.widget.TextView[contains( @ text, '保存') or contains( @ text, '作者')]"
+         element_on_clickable(10, (AppiumBy.ACCESSIBILITY_ID, '评论框'))
+```
+# 微信需要的安装包
+pip install easyocr
+安装 VC++ 运行库
+下载并安装：Microsoft Visual C++ Redistributable https://aka.ms/vs/17/release/vc_redist.x64.exe
+C:\Users\Administrator\.EasyOCR\model
+可以把 Microsoft Visual C++ Redistributable（简称 VC++ 运行库）理解为：
+Windows 系统的一个“公共能力补给包”。
+很多软件（包括你正在用的 Python 库）在开发时，为了追求极致的运行速度，会使用 C++ 来写底层核心代码。这些软件在编写时依赖了微软提供的一些“基础零件”，而 VC++ 运行库就是把这些“基础零件”打包在一起的集合。
+
+
+先卸载 CPU 版
+pip uninstall torch torchvision torchaudio
+装 CUDA 11.8 版（兼容性好）
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+或 CUDA 12.1 版（较新）
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+
 
 
 
