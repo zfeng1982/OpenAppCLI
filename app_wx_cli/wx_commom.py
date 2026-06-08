@@ -24,3 +24,7 @@ def get_img_and_text() :
     img_np = np.array(img)
     read_txt = _EA_READER_.readtext(img_np)
     return img_np,read_txt
+
+# 获取字段大小
+def get_box_front_size(bbox):
+   return bbox[2][1] - bbox[1][1]

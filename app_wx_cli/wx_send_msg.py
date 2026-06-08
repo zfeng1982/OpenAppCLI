@@ -7,9 +7,9 @@ from PIL import Image
 import easyocr
 import io
 import numpy as np
-from . import _WX_INDEX_TAB_KEYWORD_,_EA_READER_
+from . import _WX_INDEX_TAB_KEYWORD_, _EA_READER_, _WX_FONT_SIZE_DIFF
 from .wx_button_pos import get_click_pos
-from .wx_commom import get_img_and_text
+from .wx_commom import get_img_and_text, get_box_front_size
 from .wx_page_identify import friend_chat_page_indentify, index_page_indentify
 
 _wx_interval_time=1
@@ -79,8 +79,12 @@ def run(args):
                    next_bbox, next_text, next_prob = read_txt[i + 1]
                    h, w = img_np.shape[:2]
                    # print(f"next_bbox[1][0]W:{next_bbox[1][0]} w:{w} bbox[0][1]Y：{bbox[0][1]} | next_bboxY {next_bbox[0][1]}")
-                   # 昵称称和日期Y坐标偏移不超过10，并且日期在屏幕最左边95%处
-                   if next_bbox[1][0]/w>0.95 and abs(next_bbox[0][1]- bbox[0][1])<10:
+                   # 比较字体大小
+                   # text_font_size = get_box_front_size(bbox)
+                   # next_bbox_font_size = get_box_front_size(next_bbox)
+                   # print(f"text_font_size:{text_font_size},next_bbox_font_size:{next_bbox_font_size}")
+                   # 昵称和日期Y坐标偏移不超过10个像素，并且日期右上角在屏幕最左边95%处
+                   if next_bbox[1][0]/w>0.95 and abs(next_bbox[0][1]- bbox[0][1])<10 :
                        center_x = (bbox[0][0] + bbox[2][0]) / 2   # (100 + 300) / 2 = 200
                        center_y = (bbox[0][1] + bbox[2][1]) / 2   # (200 + 250) / 2 = 225
                        driver.tap([(center_x, center_y)])
