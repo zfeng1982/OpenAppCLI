@@ -14,40 +14,46 @@ from .wx_page_identify import friend_chat_page_indentify, index_page_indentify
 
 _wx_interval_time=1
 
-def switch_text_input(img_np, read_txt):
-    # for (bbox, text, prob) in read_txt:
-    #     print(text)
-    print("XXXXXXXXX")
+def switch_text_input(driver,img_np, read_txt):
+    h, w = img_np.shape[:2]
+    for (bbox, text, prob) in read_txt:
+        if text=="按住说话":
+           center_x = (bbox[0][0] + bbox[2][0]) / 2  # (100 + 300) / 2 = 200
+           center_y = (bbox[0][1] + bbox[2][1]) / 2  # (200 + 250) / 2 = 225
+           if center_y/h>0.85:
+             # 点击切换语音输入
+             driver.tap([(get_click_pos("switch_button_pos"))])
+             # print(f"text:{text}|center_x:{center_x},center_y:{center_y} w:{w} h:{h}")
 
-def send_msg(driver,msg,img_np, read_txt):
+def send_msg(msg,img_np, read_txt):
        # 先切换成文字输入
-       switch_text_input(img_np, read_txt)
+       driver = get_driver()
+       switch_text_input(driver,img_np, read_txt)
 
-       # # 还是要先点击一下,再切换输入法
-       # driver.tap([(get_click_pos("input_box_pos"))])
-       # time.sleep(0.5)
-       # # 切换这个输入法才能实现全选功能
-       # driver.execute_script('mobile: shell', {
-       #     'command': 'settings',
-       #     'args': ['put', 'secure', 'default_input_method', load_config().get("IME")]
-       # })
-       # time.sleep(1)
-       # driver.press_keycode(29, 28672)
-       # time.sleep(0.5)
-       # driver.press_keycode(67)
-       # text = "什么时候回家!"
-       # driver.set_clipboard_text(text)
-       # time.sleep(0.5)
-       # # 粘贴
-       # driver.press_keycode(50, 28672)
-       # time.sleep(1)
-       # # 切换回来,把输入法收起来才能正确找到发送按钮
-       # driver.execute_script('mobile: shell', {
-       #     'command': 'settings',
-       #     'args': ['put', 'secure', 'default_input_method', "io.appium.settings/.UnicodeIME"]
-       # })
-       # time.sleep(0.5)
-       # driver.tap([(get_click_pos("send_button_pos"))])
+       # 还是要先点击一下,再切换输入法
+       driver.tap([(get_click_pos("input_box_pos"))])
+       time.sleep(0.5)
+       # 切换这个输入法才能实现全选功能
+       driver.execute_script('mobile: shell', {
+           'command': 'settings',
+           'args': ['put', 'secure', 'default_input_method', load_config().get("IME")]
+       })
+       time.sleep(1)
+       driver.press_keycode(29, 28672)
+       time.sleep(0.5)
+       driver.press_keycode(67)
+       driver.set_clipboard_text(msg)
+       time.sleep(0.5)
+       # 粘贴
+       driver.press_keycode(50, 28672)
+       time.sleep(1)
+       # 切换回来,把输入法收起来才能正确找到发送按钮
+       driver.execute_script('mobile: shell', {
+           'command': 'settings',
+           'args': ['put', 'secure', 'default_input_method', "io.appium.settings/.UnicodeIME"]
+       })
+       time.sleep(0.5)
+       driver.tap([(get_click_pos("send_button_pos"))])
        return True
 
 def run(args):
@@ -59,7 +65,7 @@ def run(args):
         friend=args.friend
         if  friend_chat_page_indentify(friend, img_np, read_txt):
             print(f"👍 微信为当前好友[{friend}]聊天界面")
-            is_send_suc=send_msg(friend, args.msg, img_np, read_txt)
+            is_send_suc=send_msg(args.msg, img_np, read_txt)
         else:
             print(f"⏳ 微信为非当前好友[{friend}]聊天界面,尝试返回微信首页")
             #不是好友聊天界面，点返回到首页
@@ -93,7 +99,7 @@ def run(args):
                        img_np_chat, read_txt_chat = get_img_and_text()
                        if friend_chat_page_indentify(friend, img_np_chat, read_txt_chat):
                             print(f"微信已切换到当前好友[{friend}]聊天界面")
-                            is_send_suc=send_msg(friend, args.msg, img_np_chat, read_txt_chat)
+                            is_send_suc=send_msg(args.msg, img_np_chat, read_txt_chat)
                        break
 
         print("✅  消息发送成功" if is_send_suc else "❌  消息发送失败")
