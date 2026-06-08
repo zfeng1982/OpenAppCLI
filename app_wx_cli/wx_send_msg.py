@@ -63,29 +63,34 @@ def run(args):
         else:
             print(f"⏳ 微信为非当前好友[{friend}]聊天界面,尝试返回微信首页")
             #不是好友聊天界面，点返回到首页
-            isIndex, _, index_read_txt = index_page_indentify(img_np,read_txt)
+            isIndex, _, read_txt = index_page_indentify(img_np,read_txt)
             # 不是首页，试着点一下返回
             if not isIndex:
                 driver.back()
                 time.sleep(_wx_interval_time)
-                isIndex,_,index_read_txt=index_page_indentify()
+                isIndex,img_np,read_txt=index_page_indentify()
                 # 返回后还不是首页则直接退出吧
                 if not isIndex:
                     print("⚠️为保证执行安全，请在手机上手动切换到微信首页")
                     return
             #选择好友
-            for (bbox, text, prob) in index_read_txt:
-                if text == friend:
-                   center_x = (bbox[0][0] + bbox[2][0]) / 2   # (100 + 300) / 2 = 200
-                   center_y = (bbox[0][1] + bbox[2][1]) / 2   # (200 + 250) / 2 = 225
-                   driver.tap([(center_x, center_y)])
-                   time.sleep(_wx_interval_time)
-                   # 确认下是否进入了聊天界面
-                   img_np, read_txt = get_img_and_text()
-                   if friend_chat_page_indentify(friend, img_np, read_txt):
-                        print(f"微信已切换到当前好友[{friend}]聊天界面")
-                        is_send_suc=send_msg(friend, args.msg, img_np, read_txt)
-                   break
+            for i,(bbox, text, prob) in enumerate(read_txt):
+                if text == friend and i+1< len(read_txt):
+                   next_bbox, next_text, next_prob = read_txt[i + 1]
+                   h, w = img_np.shape[:2]
+                   # print(f"next_bbox[1][0]W:{next_bbox[1][0]} w:{w} bbox[0][1]Y：{bbox[0][1]} | next_bboxY {next_bbox[0][1]}")
+                   # 昵称称和日期Y坐标偏移不超过10，并且日期在屏幕最左边95%处
+                   if next_bbox[1][0]/w>0.95 and abs(next_bbox[0][1]- bbox[0][1])<10:
+                       center_x = (bbox[0][0] + bbox[2][0]) / 2   # (100 + 300) / 2 = 200
+                       center_y = (bbox[0][1] + bbox[2][1]) / 2   # (200 + 250) / 2 = 225
+                       driver.tap([(center_x, center_y)])
+                       time.sleep(_wx_interval_time)
+                       # 确认下是否进入了聊天界面
+                       img_np_chat, read_txt_chat = get_img_and_text()
+                       if friend_chat_page_indentify(friend, img_np_chat, read_txt_chat):
+                            print(f"微信已切换到当前好友[{friend}]聊天界面")
+                            is_send_suc=send_msg(friend, args.msg, img_np_chat, read_txt_chat)
+                       break
 
         print("✅  消息发送成功" if is_send_suc else "❌  消息发送失败")
 
